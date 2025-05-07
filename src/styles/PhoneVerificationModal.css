@@ -1,0 +1,116 @@
+/* ---------- MODAL OVERLAY ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(0, 255, 100, 0.1), rgba(0, 0, 0, 0.9));
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* ---------- MODAL FRAME ---------- */
+.modal-animated-frame {
+  background: linear-gradient(145deg, #101c10, #162516);
+  border: 2px solid #00ff6e;
+  border-radius: 20px;
+  padding: 2.5rem;
+  width: 90%;
+  max-width: 420px;
+  text-align: center;
+  color: white;
+  animation: fadePopUp 0.5s ease-out forwards;
+  box-shadow: 0 0 30px #00ff6e55, 0 0 8px #00ff6eaa;
+}
+
+/* ---------- ANIMACIONES ---------- */
+@keyframes fadePopUp {
+  0% {
+    transform: scale(0.8) translateY(-40px);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* ---------- TEXTO Y BOTONES ---------- */
+.modal-title {
+  color: #00ff6e;
+  font-size: 1.9rem;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 15px #00ff6e;
+}
+
+.modal-text {
+  font-size: 1rem;
+  color: #ccffe0;
+  margin-bottom: 1.2rem;
+  text-shadow: 0 0 2px #0f0;
+}
+
+.modal-divider {
+  border: none;
+  border-top: 1px solid #00ff6e55;
+  margin: 2rem auto;
+  width: 75%;
+}
+
+/* ---------- INPUTS Y BOTONES ---------- */
+.form-input {
+  width: 100%;
+  padding: 12px;
+  margin: 0.6rem 0;
+  background-color: #0a0f0a;
+  border: 1px solid #00ff6e99;
+  border-radius: 8px;
+  color: white;
+  font-size: 15px;
+  outline: none;
+  transition: border 0.3s;
+}
+
+.form-input:focus {
+  border-color: #00ff6e;
+  box-shadow: 0 0 10px #00ff6e88;
+}
+
+.form-button {
+  width: 100%;
+  background-color: #00ff6e;
+  border: none;
+  color: black;
+  font-weight: bold;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.form-button:hover {
+  background-color: #00cc52;
+  box-shadow: 0 0 18px #00ff6e;
+}
+
+/* ---------- GIF / VIDEO HEADER ---------- */
+.modal-header-gif {
+  width: 160px;
+  height: auto;
+  margin: 0 auto 1.5rem;
+  animation: bounce 2s infinite ease-in-out;
+  display: block;
+  filter: drop-shadow(0 0 12px #00ff6e99);
+}

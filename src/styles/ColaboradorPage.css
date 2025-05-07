@@ -1,0 +1,89 @@
+.table-container {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+  
+  th, td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #d1d5db;
+  }
+  
+.page-container {
+    padding: 2rem;
+    background-color: #eefcf0;
+    min-height: 100vh;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .collab-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+  
+  .collab-table th,
+  .collab-table td {
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    text-align: left;
+  }
+  
+  .edit-btn,
+  .delete-btn,
+  .new-btn {
+    padding: 0.5rem;
+    margin: 0 0.2rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .edit-btn {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  .delete-btn {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .new-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 0.6rem 1rem;
+  }
+  .submenu-link {
+    background: none;
+    border: none;
+    color: #000;
+    cursor: pointer;
+    padding: 0.5rem;
+    text-align: left;
+    width: 100%;
+  }
+  
+  .submenu-link:hover {
+    text-decoration: underline;
+    color: #2b7a78;
+  }
+  
