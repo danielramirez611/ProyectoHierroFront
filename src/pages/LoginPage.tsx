@@ -2,16 +2,31 @@ import { useEffect, useState } from 'react';
 import api from '../api';
 import { User } from '../types/User';
 import '../styles/LoginPage.css';
+import { getToken } from "firebase/messaging";
+import { messaging } from '../FirebaseData/Firebase'; // tu config Firebase
 
 interface Props {
   onLogin: (user: User) => void;
 }
+
 
 export default function LoginPage({ onLogin }: Props) {
   const [dni, setDni] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
+  const updateFirebaseToken = async (userId: number) => {
+    try {
+      const vapidKey = 'BOWk-BBMRj-OB15gVC7cao7oIn5xEBpCaH0oSYA0wIjlfzgCDdQcg5CKEMuFKLV2aq8srzMd6WthsIHRDoA4e7M';
+      const currentToken = await getToken(messaging, { vapidKey });
+      if (currentToken) {
+        await api.put(`/Users/${userId}/firebase-token`, currentToken);
+        console.log('Token Firebase actualizado en backend');
+      }
+    } catch (error) {
+      console.error('Error actualizando token Firebase:', error);
+    }
+  };
 
   // Cargar usuario recordado si existe
   useEffect(() => {
@@ -24,11 +39,34 @@ export default function LoginPage({ onLogin }: Props) {
       setRemember(true);
     }
   }, []);
-
   const handleLogin = async () => {
     try {
       const response = await api.post('/Users/login', { dni, password });
-      localStorage.setItem('user', JSON.stringify(response.data)); // <-- Guarda sesión
+
+      // Extraer datos del usuario y token
+      const {
+        token,
+        id,
+        firstName,
+        lastNameP,
+        lastNameM,
+        role,
+        documentNumber,
+        phone,
+        email,
+        passwordHash,
+        birthDate,
+        gender,
+        address,
+      } = response.data;
+
+      // Guardar token JWT y datos usuario...
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify({
+        id, firstName, lastNameP, lastNameM, role, documentNumber, phone, email,
+        passwordHash, birthDate, gender, address,
+      }));
+
       if (remember) {
         localStorage.setItem('rememberedDni', dni);
         localStorage.setItem('rememberedPassword', password);
@@ -36,13 +74,22 @@ export default function LoginPage({ onLogin }: Props) {
         localStorage.removeItem('rememberedDni');
         localStorage.removeItem('rememberedPassword');
       }
-
-      onLogin(response.data);
+  
+      // Actualiza token Firebase
+      await updateFirebaseToken(id);
+  
+      // Ejecuta acción login
+      onLogin({
+        id, firstName, lastNameP, lastNameM, role, documentNumber, phone, email,
+        passwordHash, birthDate, gender, address,
+      });
+  
     } catch (err: any) {
       setError(err.response?.data || 'Error al iniciar sesión');
     }
   };
-  
+
+
 
   return (
     <div className="login-container">

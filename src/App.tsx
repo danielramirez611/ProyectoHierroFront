@@ -10,13 +10,42 @@ import AsignacionesPage from './pages/AsignacionesPage';
 import PacientesPage from './pages/PacientesPage';
 import ContactosPage from './pages/ContactosPage';
 import RecoverPasswordPage from './pages/RecoverPasswordPage';
-
-
+import ComunicadoPage from './pages/ComunicadoPage';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { User } from './types/User';
+
+import { messaging } from './FirebaseData/Firebase'; // importa tu config Firebase
+import { onMessage } from 'firebase/messaging';
+import ComunicadoModal from './Modal/ComunicadoModal'; // importa tu modal
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
 
+ // Estado para notificación push entrante
+ const [notifData, setNotifData] = useState<{ titulo: string; cuerpo: string } | null>(null);
+ const [modalOpen, setModalOpen] = useState(false);
+
+ useEffect(() => {
+   const storedUser = localStorage.getItem('user');
+   if (storedUser) {
+     setUser(JSON.parse(storedUser));
+   }
+ }, []);
+ // Listener para recibir notificaciones en primer plano
+ useEffect(() => {
+  const unsubscribe = onMessage(messaging, (payload) => {
+    console.log('Notificación recibida:', payload);
+    if (payload.notification) {
+      setNotifData({
+        titulo: payload.notification.title || '',
+        cuerpo: payload.notification.body || '',
+      });
+      setModalOpen(true);
+    }
+  });
+  return () => unsubscribe();
+}, []);
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
@@ -30,7 +59,10 @@ function App() {
   };
 
   return (
+    <>
+      <ToastContainer position="top-right" autoClose={3000} />
     <Routes>
+      
       <Route
         path="/login"
         element={
@@ -99,11 +131,21 @@ function App() {
               </DashboardLayout>
             }
           />
+          <Route
+            path="/comunicados"
+            element={
+              <DashboardLayout onLogout={handleLogout}>
+                <ComunicadoPage />
+              </DashboardLayout>
+            }
+          />
         </>
       )}
 
       <Route path="*" element={<Navigate to={user ? '/' : '/login'} />} />
     </Routes>
+    </>
+
   );
 }
 

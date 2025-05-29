@@ -16,7 +16,9 @@ export function toUserFormData(user: User | null): UserFormData | undefined {
     role,
     birthDate,
     gender,
-    address
+    address,
+    firebaseToken // <-- agregar aquí también
+
   } = user;
 
   return {
@@ -31,6 +33,8 @@ export function toUserFormData(user: User | null): UserFormData | undefined {
     role,
     birthDate,
     gender,
-    address
+    address,
+    firebaseToken // <-- agregar aquí también
+
   };
 }

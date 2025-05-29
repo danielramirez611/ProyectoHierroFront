@@ -11,6 +11,8 @@ export interface User {
   birthDate: string;
   gender: string;
   address: string;
+  firebaseToken?: string; // <-- nuevo campo opcional para token Firebase
+
 }
 
 export type UserFormData = Omit<User, 'id'> & {

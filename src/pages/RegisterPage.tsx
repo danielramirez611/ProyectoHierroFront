@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import '../styles/LoginPage.css';
 import '../styles/PhoneVerificationModal.css';
+import { messaging } from '../FirebaseData/Firebase'; // Importa el messaging de tu config Firebase
+import { getToken } from 'firebase/messaging';
 
 import PhoneVerificationModal from '../Modal/PhoneVerificationModal';
 
@@ -19,9 +21,46 @@ export default function RegisterPage() {
         role: 'Niño',
         birthDate: '',
         gender: '',
-        address: ''
+        address: '',
+        firebaseToken: '', // <-- nuevo campo para el token
+
     });
 
+  // Aquí agregamos el useEffect para obtener el token FCM
+  useEffect(() => {
+    getToken(messaging, { vapidKey: 'BOWk-BBMRj-OB15gVC7cao7oIn5xEBpCaH0oSYA0wIjlfzgCDdQcg5CKEMuFKLV2aq8srzMd6WthsIHRDoA4e7M' }) // reemplaza con tu VAPID key de Firebase Console
+      .then((currentToken) => {
+        if (currentToken) {
+          setFormData(prev => ({ ...prev, firebaseToken: currentToken }));
+          console.log("Token FCM obtenido:", currentToken);
+        } else {
+          console.log('No se pudo obtener token FCM.');
+        }
+      })
+      .catch((err) => {
+        console.error('Error al obtener token FCM:', err);
+      });
+  }, []);
+  useEffect(() => {
+    if (Notification.permission === "granted") {
+      getToken(messaging, { vapidKey: 'BOWk-BBMRj-OB15gVC7cao7oIn5xEBpCaH0oSYA0wIjlfzgCDdQcg5CKEMuFKLV2aq8srzMd6WthsIHRDoA4e7M' })
+        .then(token => {
+          if (token) setFormData(prev => ({ ...prev, firebaseToken: token }));
+        })
+        .catch(console.error);
+    } else if (Notification.permission !== "denied") {
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          getToken(messaging, { vapidKey: 'BOWk-BBMRj-OB15gVC7cao7oIn5xEBpCaH0oSYA0wIjlfzgCDdQcg5CKEMuFKLV2aq8srzMd6WthsIHRDoA4e7M' })
+            .then(token => {
+              if (token) setFormData(prev => ({ ...prev, firebaseToken: token }));
+            })
+            .catch(console.error);
+        }
+      });
+    }
+  }, []);
+  
     const [message, setMessage] = useState<React.ReactNode>('');
     const [showVerificationModal, setShowVerificationModal] = useState(true);
     const [verificationCode, setVerificationCode] = useState('');

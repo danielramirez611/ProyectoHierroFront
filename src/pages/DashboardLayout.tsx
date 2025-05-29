@@ -100,9 +100,22 @@ export default function DashboardLayout({ children, onLogout }: DashboardLayoutP
             )}
           </div>
           <div className="menu-item">
-            <button onClick={() => setComunicacionOpen(!comunicacionOpen)} className="menu-btn">
-              <i className="fa fa-bullhorn"></i> COMUNICACIÓN
+            <button onClick={() => setGestionOpen(!gestionOpen)} className="menu-btn">
+              <i className="fa fa-folder-open"></i> ANUNCIOS
+              <img
+                src="/img/flecha.png"
+                alt="chevron"
+                className={`chevron-icon ${gestionOpen ? 'rotate' : ''}`}
+              />
             </button>
+            {gestionOpen && (
+              <div className="submenu">
+               
+                <button onClick={() => navigate('/comunicados')} className="submenu-link">
+                  Comunicado
+                </button>
+              </div>
+            )}
           </div>
           <div className="menu-item">
             <button onClick={() => setReportesOpen(!reportesOpen)} className="menu-btn">
