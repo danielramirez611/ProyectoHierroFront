@@ -1,0 +1,220 @@
+.notificaciones-buzon {
+    padding: 2rem;
+    max-width: 1100px;
+    margin: auto;
+  }
+  
+  .notificaciones-buzon h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+  }
+  
+  .no-notificaciones {
+    text-align: center;
+    font-style: italic;
+    color: #888;
+  }
+  
+  .notificaciones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .notificacion-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s;
+  }
+  
+  .notificacion-card:hover {
+    transform: scale(1.02);
+  }
+  
+  .notificacion-imagen {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+  }
+  
+  .notificacion-info {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .notificacion-titulo {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #1976d2;
+  }
+  
+  .notificacion-cuerpo {
+    font-size: 0.95rem;
+    color: #444;
+  }
+  
+  .notificacion-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.5rem;
+  }
+  
+  .notificacion-pdf {
+    color: #d32f2f;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  .notificaciones-buzon {
+    padding: 24px;
+    background-color: #f9fafb;
+    min-height: 100vh;
+  }
+  
+  .titulo-buzon {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .no-notificaciones {
+    font-style: italic;
+    color: #888;
+  }
+  
+  .notificaciones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
+  
+  .notificacion-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: transform 0.2s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .notificacion-card:hover {
+    transform: translateY(-4px);
+  }
+  
+  .notificacion-imagen-wrapper {
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+  }
+  
+  .notificacion-imagen {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .notificacion-info {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1;
+  }
+  
+  .notificacion-titulo {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 8px;
+  }
+  
+  .notificacion-cuerpo {
+    font-size: 14px;
+    color: #4b5563;
+    margin-bottom: 12px;
+  }
+  
+  .notificacion-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: #6b7280;
+  }
+  
+  .notificacion-pdf {
+    color: #2563eb;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  
+  .notificacion-pdf:hover {
+    text-decoration: underline;
+  }
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    position: relative;
+  }
+  
+  .modal-imagen {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+  
+  .modal-cerrar {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  
+  .modal-pdf {
+    margin-top: 16px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  
+  .modal-pdf:hover {
+    background: #1e40af;
+  }
+    
