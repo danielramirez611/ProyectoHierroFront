@@ -1,11 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { User } from '../types/User';
 import '../styles/DashboardPage.css';
-import CarpetaIcon from '../imgs/Icons-Nav-Bar/Carpeta.svg';
-import CasaIcon from '../imgs/Icons-Nav-Bar/Casita.svg';
+
+import CarpetaIcon  from '../imgs/Icons-Nav-Bar/Carpeta.svg';
+import CasaIcon     from '../imgs/Icons-Nav-Bar/Casita.svg';
 import MegafonoIcon from '../imgs/Icons-Nav-Bar/megafono.svg';
-import BarrasIcon from '../imgs/Icons-Nav-Bar/barras.svg';
+import BarrasIcon   from '../imgs/Icons-Nav-Bar/barras.svg';
+import logautIcon  from '../imgs/Icons-Nav-Bar/logout.svg';
+
+type MenuKey = 'gestion' | 'comunicacion' | 'reportes' | null;
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -13,158 +17,211 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children, onLogout }: DashboardLayoutProps) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [user, setUser] = useState<User | null>(() => {
+  const navigate      = useNavigate();
+  const { pathname }  = useLocation();
+
+  /* === usuario ==================================================== */
+  const [user] = useState<User | null>(() => {
     const stored = localStorage.getItem('user');
     return stored ? JSON.parse(stored) : null;
   });
 
-  const [hora, setHora] = useState('');
+  /* === reloj ====================================================== */
+  const [hora,  setHora]  = useState('');
   const [fecha, setFecha] = useState('');
-  const [gestionOpen, setGestionOpen] = useState(false);
-  const [inicioOpen, setInicioOpen] = useState(false);
-  const [comunicacionOpen, setComunicacionOpen] = useState(false);
-  const [reportesOpen, setReportesOpen] = useState(false);
 
-  useEffect(() => {
-    if (!user) navigate('/login');
-  }, [user, navigate]);
+  /* === acordeón exclusivo ======================================== */
+  const [openMenu, setOpenMenu] = useState<MenuKey>(null);
 
+  /* ===  🆕  estado para la sidebar en móvil ======================= */
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const toggleMobile  = () => setMobileOpen(p => !p);
+
+
+  /* reloj */
   useEffect(() => {
-    const intervalo = setInterval(() => {
-      const ahora = new Date();
-      setHora(
-        ahora.toLocaleTimeString('es-PE', {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: false,
-        })
-      );
-      setFecha(
-        `${String(ahora.getDate()).padStart(2, '0')}/${String(
-          ahora.getMonth() + 1
-        ).padStart(2, '0')}/${ahora.getFullYear()}`
-      );
+    const id = setInterval(() => {
+      const now = new Date();
+      setHora(now.toLocaleTimeString('es-PE', { hour12: false }));
+      setFecha(now.toLocaleDateString('es-PE'));
     }, 1000);
-    return () => clearInterval(intervalo);
+    return () => clearInterval(id);
   }, []);
 
-  const handleLogout = () => {
-    if (onLogout) onLogout();
+  /* abre el menú adecuado según la ruta */
+  useEffect(() => {
+    if (
+      ['/colaboradores','/tambos','/asignaciones','/pacientes','/contactos']
+        .some(p => pathname.startsWith(p))
+    )      setOpenMenu('gestion');
+    else if (pathname.startsWith('/comunicados'))
+            setOpenMenu('comunicacion');
+    else if (pathname.startsWith('/reportes'))
+            setOpenMenu('reportes');
+    else    setOpenMenu(null);
+  }, [pathname]);
+
+  /* helpers */
+  const toggleMenu = (k: MenuKey) => setOpenMenu(prev => (prev===k ? null : k));
+  const closeMobile = () => setMobileOpen(false);
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    setMobileOpen(false);     // cierra sólo cuando cambiamos de ruta
   };
 
-  // Evita renderizar el layout en la página de login o register
-  if (location.pathname === '/login' || location.pathname === '/register') {
-    return <>{children}</>;
-  }
-
+  /* no envuelvas login/register */
+  if (pathname === '/login' || pathname === '/register') return <>{children}</>;
   if (!user) return null;
+  /*Parte del responsive*/ 
+  
+  /* ================================================================= */
 
   return (
+      <>
+    {/* ---------- overlay (click = cerrar) ---------- */}
+    <div
+      className={`overlay ${mobileOpen ? 'show' : ''}`}
+      onClick={closeMobile}
+    />
     <div className="dashboard-container">
-      <aside className="sidebar">
+      {/* ================== SIDEBAR ================== */}
+      <aside className={`sidebar ${mobileOpen ? 'sidebar-open' : ''}`}>
         <div className="logo-section">
           <img src="/img/Logo.png" alt="Logo" className="logo" />
         </div>
-        <nav className="menu">
+
+        <nav className="menu" >
+          {/* ---------- INICIO ---------- */}
           <div className="menu-item">
             <div className="menu-item-header">
-                <img src={CasaIcon} alt="" />
-              <button onClick={() => navigate('/')} className="menu-btn">
-                  <i className="fa fa-home"></i> <span>INICIO</span>
-                </button>
+              <img src={CasaIcon} alt="" />
+              <button
+                onClick={() => handleNavigate('/')}
+                className={`menu-btn ${pathname === '/' ? 'active' : ''}`}
+              >
+                INICIO
+              </button>
             </div>
           </div>
-          <div className="menu-item">
-            <div className="menu-item-header" onClick={() => setGestionOpen(!gestionOpen)}>
 
-            <img src={CarpetaIcon} alt="" />
-            <button  className="menu-btn">
-              <i className="fa fa-folder-open"></i> 
-              <span>GESTIÓN</span>
-            </button>
+          {/* ---------- GESTIÓN ---------- */}
+          <div className={`menu-item ${openMenu==='gestion' ? 'open' : ''}`}>
+            <div
+              className="menu-item-header"
+              onClick={() => toggleMenu('gestion')}
+            >
+              <img src={CarpetaIcon} alt="" />
+              <button
+                className={`menu-btn ${
+                  ['/colaboradores','/tambos','/asignaciones','/pacientes','/contactos']
+                    .some(p => pathname.startsWith(p)) ? 'active' : ''
+                }`}
+              >
+                GESTIÓN
+              </button>
               <img
                 src="/img/flecha.png"
                 alt="chevron"
-                className={`chevron-icon ${gestionOpen ? 'rotate' : ''}`}
+                className={`chevron-icon ${openMenu==='gestion' ? 'rotate' : ''}`}
               />
             </div>
-            {gestionOpen && (
+
+            {openMenu==='gestion' && (
               <div className="submenu">
-                <button onClick={() => navigate('/colaboradores')} className="submenu-link">
-                  Colaboradores
-                </button>
-                <button onClick={() => navigate('/tambos')} className="submenu-link">
-                  Tambos
-                </button>
-                <button onClick={() => navigate('/asignaciones')} className="submenu-link">
-                  Asignación de gestores
-                </button>
-                <button onClick={() => navigate('/pacientes')} className="submenu-link">
-                  Pacientes
-                </button>
-                <button onClick={() => navigate('/contactos')} className="submenu-link">
-                  Contactos
-                </button>
+                {[
+                  {path:'/colaboradores', label:'Colaboradores'},
+                  {path:'/tambos',       label:'Tambos'},
+                  {path:'/asignaciones', label:'Asignación de gestores'},
+                  {path:'/pacientes',    label:'Pacientes'},
+                  {path:'/contactos',    label:'Contactos'},
+                ].map(({path,label})=>(
+                  <button
+                    key={path}
+                    onClick={() =>  handleNavigate(path)}
+                    className={`submenu-link ${pathname === path ? 'active' : ''}`}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
             )}
           </div>
-          <div className="menu-item">
-            <div className="menu-item-header " onClick={() => setComunicacionOpen(!comunicacionOpen)}>
+
+          {/* ---------- COMUNICACIÓN ---------- */}
+          <div className={`menu-item ${openMenu==='comunicacion' ? 'open' : ''}`}>
+            <div
+              className="menu-item-header"
+              onClick={() => toggleMenu('comunicacion')}
+            >
               <img src={MegafonoIcon} alt="" />
-              <button  className="menu-btn">
-                <i className="fa fa-folder-open"></i> <span>COMONUCACION</span>
+              <button
+                className={`menu-btn ${pathname.startsWith('/comunicados') ? 'active' : ''}`}
+              >
+                COMUNICACIÓN
               </button>
-                <img
-                  src="/img/flecha.png"
-                  alt="chevron"
-                  className={`chevron-icon ${comunicacionOpen ? 'rotate' : ''}`}
-                />
+              <img
+                src="/img/flecha.png"
+                alt="chevron"
+                className={`chevron-icon ${openMenu==='comunicacion' ? 'rotate' : ''}`}
+              />
             </div>
-            {comunicacionOpen && (
+
+            {openMenu==='comunicacion' && (
               <div className="submenu">
-               
-                <button onClick={() => navigate('/comunicados')} className="submenu-link">
+                <button
+                  onClick={() =>  handleNavigate('/comunicados')}
+                  className={`submenu-link ${pathname === '/comunicados' ? 'active' : ''}`}
+                >
                   Comunicado
                 </button>
               </div>
             )}
           </div>
-          <div className="menu-item">
-            <div className="menu-item-header"  onClick={() => setReportesOpen(!reportesOpen)}> 
+
+          {/* ---------- REPORTES ---------- */}
+          <div className={`menu-item ${openMenu==='reportes' ? 'open' : ''}`}>
+            <div
+              className="menu-item-header"
+              onClick={() => toggleMenu('reportes')}
+            >
               <img src={BarrasIcon} alt="" />
-              <button onClick={() => setReportesOpen(!reportesOpen)} className="menu-btn">
-                <i className="fa fa-chart-bar"></i> <span>REPORTES</span>
+              <button
+                className={`menu-btn ${pathname.startsWith('/reportes') ? 'active' : ''}`}
+              >
+                REPORTES
               </button>
               <img
-                    src="/img/flecha.png"
-                    alt="chevron"
-                    className={`chevron-icon ${reportesOpen ? 'rotate' : ''}`}
-                  />
-              </div>
+                src="/img/flecha.png"
+                alt="chevron"
+                className={`chevron-icon ${openMenu==='reportes' ? 'rotate' : ''}`}
+              />
+            </div>
+            {/* Añade sub-menú si fuera necesario */}
           </div>
-          <button onClick={handleLogout} className="logout-btn">
+
+          <button onClick={onLogout} className="logout-btn">
+            <img src={logautIcon} alt="" />
             Cerrar sesión
           </button>
         </nav>
       </aside>
 
+      {/* ================== CONTENIDO ================== */}
       <main className="main-content">
         <header className="dashboard-header">
+          {/* 🆕  botón ☰ visible sólo en móvil */}
+          <button className="hamburger-btn" onClick={toggleMobile}>
+            ☰
+          </button>
+
           <div className="user-info">
-            <span>
-              👤 {user.firstName} {user.lastNameP}
-            </span>
-            <span>
-              📅 {fecha} 🕒 {hora}
-            </span>
+            👤 {user.firstName} {user.lastNameP} &nbsp;|&nbsp; 📅 {fecha} 🕒 {hora}
           </div>
         </header>
 
         <section className="dashboard-body">{children}</section>
       </main>
     </div>
+    </>
   );
 }

@@ -4,11 +4,12 @@
   display: flex;
   height: 100vh;
   overflow: hidden;
+  font-family: 'Segoe UI', sans-serif;
 }
 
 /* menú lateral */
 .sidebar {
-  width: 240px;
+  width: 260px;
   background-color: #14532d;
   color: white;
   padding: 1rem;
@@ -16,6 +17,7 @@
   flex-direction: column;
   justify-content: space-between;
   box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
+  width: min(70vw, 220px);
 }
 
 .logo-section {
@@ -33,12 +35,9 @@
   flex-grow: 1;
 }
 
-.menu-item {
-  margin-bottom: 0.5rem;
-}
 
-.menu-btn,
-.logout-btn {
+
+.menu-btn{
   width: 100%;
   background: none;
   border: none;
@@ -50,10 +49,7 @@
   border-radius: 4px;
 }
 
-.menu-item-header:hover{
-  border-radius: 10px;
-  background-color: #0d3a1f;
-}
+
 
 .submenu {
   padding-left: 1rem;
@@ -62,18 +58,32 @@
 
 .submenu-link {
   display: block;
-  background: none;
+  background: transparent;
   border: none;
   color: white;
   text-align: left;
   padding: 0.5rem;
   width: 100%;
   cursor: pointer;
+  font-size: 19px;
+}
+.submenu-link.active {
+  color: #ffffff;
+  font-weight: 700;         /* más grueso */
+  letter-spacing: 0.25px;   /* mejora legibilidad */
+  position: relative;
+}
+.submenu-link.active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 4px;
+  width: 4px;
+  height: calc(100% - 8px);
+  border-radius: 2px;
+  background: #34d399;      /* verde tailwind-like para contraste */
 }
 
-.submenu-link:hover {
-  background-color: #0b2e1b;
-}
 
 /* ícono flecha */
 .chevron-icon {
@@ -141,7 +151,7 @@ th, td {
   }
   
   .sidebar {
-    width: 240px;
+    width: 270px; /*ancho de la barra lateral*/
     background-color: #267c39;
     color: white;
     display: flex;
@@ -163,14 +173,11 @@ th, td {
   
   .menu button {
     width: 100%;
-    margin: 10px 0;
     color: white;
     border: none;
-    padding: 10px;
     border-radius: 6px;
     cursor: pointer;
     text-align: left;
-    padding-left: 15px;
     transition: background 0.3s;
   }
   
@@ -246,13 +253,35 @@ th, td {
   }
   
   .menu-item {
-    background: linear-gradient(to bottom, #236e2f, #1d5a25);
+    background: #276a2b;
     border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-
-    /* display: flex;
-    align-items: center; */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    margin-bottom: 0.5rem;
+    transition:
+      box-shadow 0.25s ease,
+      transform 0.25s ease,
+      filter 0.25s ease;
+    will-change: transform, box-shadow;
   }
+
+  .menu-item.open {
+    /* 1️⃣ Levantamos el elemento “fuera” de la pantalla */
+    transform: translateY(-6px) translateZ(20px) scale(1.04);
+
+    /* 2️⃣ Le damos un z-index alto para que pase por encima del resto */
+    position: relative;
+    z-index: 10;
+
+    /* 3️⃣ Sombra en dos capas:
+          - capa difusa para profundidad
+          - capa nítida para rematar el contorno
+    */
+    box-shadow:
+      0 16px 32px rgba(0, 0, 0, 0.28),
+      0 0   0  1px rgba(255, 255, 255, 0.08) inset;
+  }
+
+
   .menu-item-header img{
     padding: 1px 5px;
   }
@@ -260,28 +289,31 @@ th, td {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1px 5px;
+    padding: 10px 5px;
     cursor: pointer;
     color: white;
     font-size: 16px;
     font-weight: bold;
+    font-size: 10rem;
   }
-  .menu-btn {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 12px 16px;
-    background: transparent;
-    border: none;
-    color: white;
-    font-size: 14px;
-    font-weight: bold;
-  }
+ .menu-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  font-size: 17px;          /* ⬆︎ un poco más grande */
+  font-weight: 600;
+  color: inherit;
+}
+.menu-btn.active {
+  filter: brightness(1.15);
+}
   .menu-btn span {
     flex-grow: 1;
     text-align: left;
-
+    font-size: 16px;
   }
   
   
@@ -295,13 +327,11 @@ th, td {
   }
   
   .submenu {
-    background-color: rgba(255, 255, 255, 0.07);
     border-radius: 10px;
     margin-top: 8px;
     padding: 10px 18px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
   }
   
   .submenu a {
@@ -313,7 +343,6 @@ th, td {
   }
   
   .submenu a:hover {
-    color: #ffffff;
     font-weight: 500;
   }
 
@@ -327,17 +356,97 @@ th, td {
   .chevron-icon.rotate {
     transform: rotate(180deg);
   }
+  .menu-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 70px;   /* espacio para “Cerrar sesión” */
+}
   .logout-btn {
-    margin-top: 30px;
-    background-color: #c62828;
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    width: 100%;
-  }
-  .logout-btn:hover {
-    background-color: #a81e1e;
-  }
+  /* ya existentes — los dejamos */
+  width: 100%;
+  margin-top: auto;
+  background: #c62828;
+  color: #fff;
+  border: none;
+  padding: 12px 0;       /* un poco más de alto */
+  border-radius: 6px;
+  cursor: pointer;
+
+  /* === NUEVO === */
+  display: flex;          /* alinea icono + texto */
+  align-items: center;    /* centra verticalmente */
+  justify-content: center;/* centra horizontalmente */
+  gap: 8px;               /* espacio entre icono y texto */
+  font-size: 17px;        /* ⬆︎ incrementa el tamaño de letra */
+  font-weight: 600;       /* opcional: negrita */
+}
+
+.logout-btn img {
+  width: 25px;            /* controla tamaño del icono */
+  height: 25px;
+}
+
+.logout-btn:hover {
+  background: #a81e1e;
+}
+
   
+
+
+  /* estilos del responsive */
+  /* ========== MOBILE (< 768 px) ========== */
+@media (max-width: 768px) {
+  .logo { width: 130px; }
+  /* Panel lateral ----------------------- */
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;          /* top 0, left 0, height 100 % */
+    width: min(80vw, 240px);    /* 80 % del viewport, máx 240 px */
+    height: 100%;
+    background: #14532d;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+  .sidebar.sidebar-open {        /* cuando se abre */
+    transform: translateX(0);
+    box-shadow: 4px 0 15px rgba(0,0,0,0.35);
+  }
+
+  /* Fondo semitransparente -------------- */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 900;
+  }
+  .overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Botón ☰ siempre visible en el header */
+  .hamburger-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-right: 8px;
+    background: transparent;
+    border: none;
+    font-size: 26px;
+    color: #14532d;
+    cursor: pointer;
+  }
+}
+
+/* ========== DESKTOP (≥ 768 px) ========== */
+@media (min-width: 769px) {
+  .hamburger-btn { display: none; }
+  .overlay       { display: none; }
+}
