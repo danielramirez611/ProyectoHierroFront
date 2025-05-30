@@ -20,7 +20,7 @@ export default function LoginPage({ onLogin }: Props) {
       const vapidKey = 'BOWk-BBMRj-OB15gVC7cao7oIn5xEBpCaH0oSYA0wIjlfzgCDdQcg5CKEMuFKLV2aq8srzMd6WthsIHRDoA4e7M';
       const currentToken = await getToken(messaging, { vapidKey });
       if (currentToken) {
-        await api.put(`/Users/${userId}/firebase-token`, currentToken);
+        await api.put(`/Users/${userId}/firebase-token`, { firebaseToken: currentToken });
         console.log('Token Firebase actualizado en backend');
       }
     } catch (error) {
