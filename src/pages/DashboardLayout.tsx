@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { User } from '../types/User';
 import '../styles/DashboardPage.css';
+import CarpetaIcon from '../imgs/Icons-Nav-Bar/Carpeta.svg';
+import CasaIcon from '../imgs/Icons-Nav-Bar/Casita.svg';
+import MegafonoIcon from '../imgs/Icons-Nav-Bar/megafono.svg';
+import BarrasIcon from '../imgs/Icons-Nav-Bar/barras.svg';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -66,19 +70,27 @@ export default function DashboardLayout({ children, onLogout }: DashboardLayoutP
         </div>
         <nav className="menu">
           <div className="menu-item">
-          <button onClick={() => navigate('/')} className="menu-btn">
-              <i className="fa fa-home"></i> INICIO
-            </button>
+            <div className="menu-item-header">
+                <img src={CasaIcon} alt="" />
+              <button onClick={() => navigate('/')} className="menu-btn">
+                  <i className="fa fa-home"></i> <span>INICIO</span>
+                </button>
+            </div>
           </div>
           <div className="menu-item">
-            <button onClick={() => setGestionOpen(!gestionOpen)} className="menu-btn">
-              <i className="fa fa-folder-open"></i> GESTIÓN
+            <div className="menu-item-header" onClick={() => setGestionOpen(!gestionOpen)}>
+
+            <img src={CarpetaIcon} alt="" />
+            <button  className="menu-btn">
+              <i className="fa fa-folder-open"></i> 
+              <span>GESTIÓN</span>
+            </button>
               <img
                 src="/img/flecha.png"
                 alt="chevron"
                 className={`chevron-icon ${gestionOpen ? 'rotate' : ''}`}
               />
-            </button>
+            </div>
             {gestionOpen && (
               <div className="submenu">
                 <button onClick={() => navigate('/colaboradores')} className="submenu-link">
@@ -100,15 +112,18 @@ export default function DashboardLayout({ children, onLogout }: DashboardLayoutP
             )}
           </div>
           <div className="menu-item">
-            <button onClick={() => setGestionOpen(!gestionOpen)} className="menu-btn">
-              <i className="fa fa-folder-open"></i> ANUNCIOS
-              <img
-                src="/img/flecha.png"
-                alt="chevron"
-                className={`chevron-icon ${gestionOpen ? 'rotate' : ''}`}
-              />
-            </button>
-            {gestionOpen && (
+            <div className="menu-item-header " onClick={() => setComunicacionOpen(!comunicacionOpen)}>
+              <img src={MegafonoIcon} alt="" />
+              <button  className="menu-btn">
+                <i className="fa fa-folder-open"></i> <span>COMONUCACION</span>
+              </button>
+                <img
+                  src="/img/flecha.png"
+                  alt="chevron"
+                  className={`chevron-icon ${comunicacionOpen ? 'rotate' : ''}`}
+                />
+            </div>
+            {comunicacionOpen && (
               <div className="submenu">
                
                 <button onClick={() => navigate('/comunicados')} className="submenu-link">
@@ -118,9 +133,17 @@ export default function DashboardLayout({ children, onLogout }: DashboardLayoutP
             )}
           </div>
           <div className="menu-item">
-            <button onClick={() => setReportesOpen(!reportesOpen)} className="menu-btn">
-              <i className="fa fa-chart-bar"></i> REPORTES
-            </button>
+            <div className="menu-item-header"  onClick={() => setReportesOpen(!reportesOpen)}> 
+              <img src={BarrasIcon} alt="" />
+              <button onClick={() => setReportesOpen(!reportesOpen)} className="menu-btn">
+                <i className="fa fa-chart-bar"></i> <span>REPORTES</span>
+              </button>
+              <img
+                    src="/img/flecha.png"
+                    alt="chevron"
+                    className={`chevron-icon ${reportesOpen ? 'rotate' : ''}`}
+                  />
+              </div>
           </div>
           <button onClick={handleLogout} className="logout-btn">
             Cerrar sesión

@@ -50,8 +50,8 @@
   border-radius: 4px;
 }
 
-.menu-btn:hover,
-.logout-btn:hover {
+.menu-item-header:hover{
+  border-radius: 10px;
   background-color: #0d3a1f;
 }
 
@@ -141,7 +141,7 @@ th, td {
   }
   
   .sidebar {
-    width: 200px;
+    width: 240px;
     background-color: #267c39;
     color: white;
     display: flex;
@@ -164,7 +164,6 @@ th, td {
   .menu button {
     width: 100%;
     margin: 10px 0;
-    background-color: #206430;
     color: white;
     border: none;
     padding: 10px;
@@ -175,9 +174,7 @@ th, td {
     transition: background 0.3s;
   }
   
-  .menu button:hover {
-    background-color: #1a5327;
-  }
+  
   
   .main-content {
     flex: 1;
@@ -252,9 +249,23 @@ th, td {
     background: linear-gradient(to bottom, #236e2f, #1d5a25);
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+
+    /* display: flex;
+    align-items: center; */
   }
-  
-  
+  .menu-item-header img{
+    padding: 1px 5px;
+  }
+  .menu-item-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1px 5px;
+    cursor: pointer;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+  }
   .menu-btn {
     display: flex;
     align-items: center;
@@ -266,6 +277,11 @@ th, td {
     color: white;
     font-size: 14px;
     font-weight: bold;
+  }
+  .menu-btn span {
+    flex-grow: 1;
+    text-align: left;
+
   }
   
   
