@@ -56,8 +56,15 @@ export default function ComunicadoPage() {
         const res = await api.post('/Comunicado', form);
         toast.success('✅ Comunicado creado correctamente');
         console.log('📩 Comunicado enviado correctamente:', res.data);
+  
+        // 🔔 Mostrar notificación local si se tiene permiso
+        if (Notification.permission === 'granted') {
+          new Notification(form.titulo, {
+            body: form.cuerpo,
+          });
+        }
       }
-
+  
       await fetchComunicados();
       setModalOpen(false);
       setSelectedComunicado(null);
@@ -74,6 +81,7 @@ export default function ComunicadoPage() {
       toast.error('❌ Ocurrió un error al guardar el comunicado');
     }
   };
+  
 
   return (
     <div className="page-container">
