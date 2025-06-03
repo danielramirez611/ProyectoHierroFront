@@ -54,10 +54,10 @@ export default function ComunicadoPage() {
   }, [search, comunicados]);
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('¿Estás seguro de eliminar este comunicado?')) return;
-    await api.delete(`/Comunicado/${id}`);
-    fetchComunicados();
-  };
+  if (!window.confirm('¿Estás seguro de eliminar este comunicado de forma permanente?')) return;
+  await api.delete(`/Comunicado/eliminar-fisico/${id}`); // 🔥 Cambio aquí
+  fetchComunicados(); // 🟢 Recarga la lista
+};
 
   const handleSubmit = async () => {
     try {
