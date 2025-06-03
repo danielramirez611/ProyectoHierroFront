@@ -3,7 +3,7 @@ import api from '../api';
 import '../styles/ColaboradorPage.css';
 import AsignacionModal from '../Modal/AsignacionModal';
 import type { Asignacion, AsignacionExtendida } from '../types/Asignacion';
-
+import addUserIcon from '../imgs/Icons-botones/addUser.svg';
 
 
 export default function AsignacionesPage() {
@@ -44,25 +44,41 @@ export default function AsignacionesPage() {
     <div className="page-container">
       <div className="header">
         <h2>Lista de Asignaciones</h2>
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Ingrese el nombre"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="input-blue"
-          />
-          <button>🔍</button>
-        </div>
-        <button
-          className="new-btn"
-          onClick={() => {
+      </div>
+
+        {/* CONTROLES */}
+       <div className="actions" style={{ marginBottom: '1.5rem' }}>
+          {/* BUSCADOR */}
+          <div className="search-bar">
+            <input
+              type="text"
+              placeholder="Ingrese el nombre del colaborador o tambo"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              aria-label="Buscar colaborador por nombre"
+            />
+            <span className="search-icon">🔍</span>
+          </div>
+
+          {/* NUEVO */}
+          <button
+            className="new-btn"
+            onClick={() => {
             setSelectedAsignacion(undefined);
             setModalOpen(true);
           }}
-        >
-          ➕ Nueva Asignación
-        </button>      </div>
+            aria-label="Agregar nueva asignación"
+            title="Agregar asignación"
+          >
+            <img src={addUserIcon} alt="" />
+            <span>
+              Nueva
+              <br />
+              Asignación
+            </span>
+          </button>
+        
+        </div>
 
       <table className="collab-table">
         <thead>

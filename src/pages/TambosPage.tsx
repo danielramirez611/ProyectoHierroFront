@@ -4,6 +4,7 @@ import '../styles/ColaboradorPage.css';
 import TamboModal from '../Modal/TamboModal';
 import { Tambo } from '../types/Tambo';
 
+import addUserIcon from '../imgs/Icons-botones/addUser.svg';
 
 
 export default function TambosPage() {
@@ -44,20 +45,37 @@ export default function TambosPage() {
     <div className="page-container">
       <div className="header">
         <h2>Lista de Tambos</h2>
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Ingrese el nombre"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="input-blue"
-          />
-          <button>🔍</button>
-        </div>
-        <button className="new-btn" onClick={() => {
-          setSelectedTambo(null);
-          setModalOpen(true);
-        }}>➕ Nuevo Tambo</button>      </div>
+      </div>
+        {/* CONTROLES */}
+        <div className="actions" style={{ marginBottom: '1.5rem' }}>
+          {/* BUSCADOR */}
+          <div className="search-bar">
+            <input
+              type="text"
+              placeholder="Ingrese el nombre"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              aria-label="Buscar Tambo por nombre"
+            />
+            <span className="search-icon">🔍</span>
+          </div>
+        <button
+            className="new-btn"
+            onClick={() => {
+              setSelectedTambo(null);
+              setModalOpen(true);
+            }}
+            aria-label="Agregar nuevo Tambo"
+            title="Agregar Tambo"
+          >
+            <img src={addUserIcon} alt="" />
+            <span>
+              Nuevo
+              <br />
+              Tambo
+            </span>
+          </button>
+      </div>
 
       <table className="collab-table">
         <thead>

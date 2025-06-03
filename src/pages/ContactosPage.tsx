@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../api';
 import '../styles/ColaboradorPage.css';
 import ContactoModal from '../Modal/ContactoModal'; // asegúrate que exista
+import addUserIcon from '../imgs/Icons-botones/addUser.svg'; // asegúrate que exista
 
 interface Contacto {
   id: number;
@@ -62,22 +63,40 @@ export default function ContactosPage() {
     <div className="page-container">
       <div className="header">
         <h2>Lista de Contactos</h2>
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Buscar por nombre"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="input-blue"
-          />
-          <button>🔍</button>
+      </div>
+
+        {/* CONTROLES */}
+        <div className="actions" style={{ marginBottom: '1.5rem' }}>
+          {/* BUSCADOR */}
+          <div className="search-bar">
+            <input
+              type="text"
+              placeholder="Ingrese el nombre"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              aria-label="Buscar al contacto por nombre"
+            />
+            <span className="search-icon">🔍</span>
+          </div>
+
+          {/* NUEVO */}
+          <button
+            className="new-btn"
+            onClick={() => {
+              setSelectedContacto(null);
+              setOpenModal(true);
+            }}
+            aria-label="Agregar nuevo contacto"
+            title="Agregar contacto"
+          >
+            <img src={addUserIcon} alt="" />
+            <span>
+              Nuevo
+              <br />
+              Contacto
+            </span>
+          </button>
         </div>
-        <button className="new-btn" onClick={() => {
-          setSelectedContacto(null);
-          setOpenModal(true);
-        }}>
-          ➕ Nuevo Contacto
-        </button>      </div>
 
       <table className="collab-table">
         <thead>

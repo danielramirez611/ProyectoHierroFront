@@ -10,6 +10,8 @@ import {
 import '../styles/ColaboradorPage.css';
 import { toast } from 'react-toastify';
 import PdfPreviewModal from '../Modal/PdfPreviewModal';
+import addUserIcon from '../imgs/Icons-botones/addUser.svg'; // asegúrate que exista
+
 
 export default function ComunicadoPage() {
   const [comunicados, setComunicados] = useState<Comunicado[]>([]);
@@ -186,19 +188,26 @@ if ('Notification' in window) {
     <div className="page-container">
       <div className="header">
         <h2>Lista de Comunicados</h2>
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Buscar por título"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="input-blue"
-          />
-          <button>🔍</button>
-        </div>
-        <button
-          className="new-btn"
-          onClick={() => {
+      </div>
+
+        {/* CONTROLES */}
+       <div className="actions" style={{ marginBottom: '1.5rem' }}>
+          {/* BUSCADOR */}
+          <div className="search-bar">
+            <input
+              type="text"
+              placeholder="Ingrese el título del comunicado"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              aria-label="Buscar comunicado por título"
+            />
+            <span className="search-icon">🔍</span>
+          </div>
+
+          {/* NUEVO */}
+          <button
+            className="new-btn"
+            onClick={() => {
             setSelectedComunicado(null);
             setForm({
               titulo: '',
@@ -213,10 +222,17 @@ if ('Notification' in window) {
             });
             setModalOpen(true);
           }}
-        >
-          ➕ Nuevo Comunicado
-        </button>
-      </div>
+            aria-label="Crear nuevo comunicado"
+            title="crear comunicado"
+          >
+            <img src={addUserIcon} alt="" />
+            <span>
+             Crear Nuevo
+              <br />
+              Comunicado
+            </span>
+          </button>
+        </div>
 
       <table className="collab-table">
         <thead>

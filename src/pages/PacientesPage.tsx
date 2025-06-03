@@ -3,7 +3,7 @@ import api from '../api';
 import '../styles/ColaboradorPage.css';
 import PacienteModal from '../Modal/PacienteModal';
 import { Paciente } from '../types/Paciente'; // ajusta el path si es necesario
-
+import addUserIcon from '../imgs/Icons-botones/addUser.svg'; // ajusta el path si es necesario
 
 
 export default function PacientesPage() {
@@ -50,23 +50,40 @@ export default function PacientesPage() {
     <div className="page-container">
       <div className="header">
         <h2>Lista de Pacientes</h2>
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Buscar paciente por nombre"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="input-blue"
-          />
-          <button>🔍</button>
-        </div>
-        <button className="new-btn" onClick={() => {
-  setSelectedPaciente(null);
-  setOpenModal(true);
-}}>
-  ➕ Nuevo Paciente
-</button>
       </div>
+
+        {/* CONTROLES */}
+        <div className="actions" style={{ marginBottom: '1.5rem' }}>
+          {/* BUSCADOR */}
+          <div className="search-bar">
+            <input
+              type="text"
+              placeholder="Ingrese el nombre"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              aria-label="Buscar al paciente por nombre"
+            />
+            <span className="search-icon">🔍</span>
+          </div>
+
+          {/* NUEVO */}
+          <button
+            className="new-btn"
+            onClick={() => {
+              setSelectedPaciente(null);
+              setOpenModal(true);
+            }}
+            aria-label="Agregar nuevo paciente"
+            title="Agregar paciente"
+          >
+            <img src={addUserIcon} alt="" />
+            <span>
+              Nuevo
+              <br />
+              PAciente
+            </span>
+          </button>
+        </div>
 
       <table className="collab-table">
         <thead>
