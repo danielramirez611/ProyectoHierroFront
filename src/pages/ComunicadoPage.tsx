@@ -59,69 +59,55 @@ export default function ComunicadoPage() {
   fetchComunicados(); // 🟢 Recarga la lista
 };
 
-  const handleSubmit = async () => {
-    try {
-      if (selectedComunicado?.id) {
-        await api.put(`/Comunicado/${selectedComunicado.id}`, form);
-        toast.success('✅ Comunicado actualizado correctamente');
-      } else {
-        await api.post('/Comunicado', form);
-        toast.success('✅ Comunicado creado correctamente');
-  
-        // ✅ Mostrar notificación push si es posible
-      // ✅ Mostrar notificación push si es posible
-if ('Notification' in window) {
-  console.log('🔔 Notification API está disponible');
+ const handleSubmit = async () => {
+  try {
+    if (selectedComunicado?.id) {
+      await api.put(`/Comunicado/${selectedComunicado.id}`, form);
+      toast.success('✅ Comunicado actualizado correctamente');
+    } else {
+      await api.post('/Comunicado', form);
+      toast.success('✅ Comunicado creado correctamente');
+    }
 
-  if (Notification.permission === 'granted') {
-    console.log('🔓 Permiso ya concedido para notificaciones');
-    new Notification(form.titulo, {
-      body: form.cuerpo,
-      image: form.imagenUrl || undefined,
-    });
-    console.log('📤 Notificación enviada');
-  } else if (Notification.permission !== 'denied') {
-    console.log('📩 Solicitando permiso para notificaciones...');
-    Notification.requestPermission().then((permission) => {
-      console.log('🔐 Resultado del permiso:', permission);
-      if (permission === 'granted') {
+    // ✅ Enviar notificación después de crear o editar
+    if ('Notification' in window) {
+      if (Notification.permission === 'granted') {
         new Notification(form.titulo, {
           body: form.cuerpo,
           image: form.imagenUrl || undefined,
         });
-        console.log('📤 Notificación enviada tras permiso');
-      } else {
-        console.warn('🚫 Permiso de notificaciones denegado');
+      } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then((permission) => {
+          if (permission === 'granted') {
+            new Notification(form.titulo, {
+              body: form.cuerpo,
+              image: form.imagenUrl || undefined,
+            });
+          }
+        });
       }
-    });
-  } else {
-    console.warn('❌ Notificaciones bloqueadas permanentemente');
-  }
-} else {
-  console.error('❌ Notification API no está soportada en este navegador');
-}
-
-      }
-  
-      await fetchComunicados();
-      setModalOpen(false);
-      setSelectedComunicado(null);
-      setForm({
-        titulo: '',
-        cuerpo: '',
-        destinatario: DestinatarioEnum.Niño,
-        fechaInicio: '',
-        fechaFin: '',
-        canalEnvio: ComunicadoCanalEnvioEnum.App,
-        imagenUrl: '',
-        urlPDF: '',
-        tipoContenido: TipoContenidoEnum.Informativo,
-      });
-    } catch (error: any) {
-      console.error('❌ Error al enviar comunicado:', error);
-      toast.error('❌ Ocurrió un error al guardar el comunicado');
     }
-  };
+
+    await fetchComunicados();
+    setModalOpen(false);
+    setSelectedComunicado(null);
+    setForm({
+      titulo: '',
+      cuerpo: '',
+      destinatario: DestinatarioEnum.Niño,
+      fechaInicio: '',
+      fechaFin: '',
+      canalEnvio: ComunicadoCanalEnvioEnum.App,
+      imagenUrl: '',
+      urlPDF: '',
+      tipoContenido: TipoContenidoEnum.Informativo,
+    });
+  } catch (error: any) {
+    console.error('❌ Error al enviar comunicado:', error);
+    toast.error('❌ Ocurrió un error al guardar el comunicado');
+  }
+};
+
   
 
   const renderTipoContenido = (tipo: number | string | undefined) => {
