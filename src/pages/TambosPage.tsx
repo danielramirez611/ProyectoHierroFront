@@ -6,14 +6,13 @@ import { Tambo } from '../types/Tambo';
 
 import addUserIcon from '../imgs/Icons-botones/addUser.svg';
 
-
 export default function TambosPage() {
   const [tambos, setTambos] = useState<Tambo[]>([]);
   const [search, setSearch] = useState('');
   const [filteredTambos, setFilteredTambos] = useState<Tambo[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedTambo, setSelectedTambo] = useState<Tambo | null>(null);
-
+  const [selectedTambo, setSelectedTambo] = useState<Partial<Tambo> | undefined>(undefined);
+  
   const fetchTambos = async () => {
     try {
       const res = await api.get('/Tambos');
@@ -40,41 +39,45 @@ export default function TambosPage() {
     await api.delete(`/Tambos/${id}`);
     fetchTambos();
   };
-
+    const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedTambo(undefined);  // limpiar selección
+  };
   return (
     <div className="page-container">
       <div className="header">
         <h2>Lista de Tambos</h2>
       </div>
-        {/* CONTROLES */}
-        <div className="actions" style={{ marginBottom: '1.5rem' }}>
-          {/* BUSCADOR */}
-          <div className="search-bar">
-            <input
-              type="text"
-              placeholder="Ingrese el nombre"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              aria-label="Buscar Tambo por nombre"
-            />
-            <span className="search-icon">🔍</span>
-          </div>
+
+      {/* CONTROLES */}
+      <div className="actions" style={{ marginBottom: '1.5rem' }}>
+        {/* BUSCADOR */}
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="Ingrese el nombre"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            aria-label="Buscar Tambo por nombre"
+          />
+          <span className="search-icon">🔍</span>
+        </div>
         <button
-            className="new-btn"
-            onClick={() => {
-              setSelectedTambo(null);
-              setModalOpen(true);
-            }}
-            aria-label="Agregar nuevo Tambo"
-            title="Agregar Tambo"
-          >
-            <img src={addUserIcon} alt="" />
-            <span>
-              Nuevo
-              <br />
-              Tambo
-            </span>
-          </button>
+          className="new-btn"
+          onClick={() => {
+            setSelectedTambo(undefined);
+            setModalOpen(true);
+          }}
+          aria-label="Agregar nuevo Tambo"
+          title="Agregar Tambo"
+        >
+          <img src={addUserIcon} alt="" />
+          <span>
+            Nuevo
+            <br />
+            Tambo
+          </span>
+        </button>
       </div>
 
       <table className="collab-table">
@@ -90,8 +93,8 @@ export default function TambosPage() {
             <th>Horario</th>
             <th>Tipo</th>
             <th>Representante</th>
-            <th>DNI</th>
-            <th>Teléfono</th>
+            {/* <th>DNI</th>
+            <th>Teléfono</th> */}
             <th>Estado</th>
             <th>Acciones</th>
           </tr>
@@ -104,13 +107,13 @@ export default function TambosPage() {
               <td>{t.departamento}</td>
               <td>{t.provincia}</td>
               <td>{t.distrito}</td>
-              <td>{t.direccion}</td>
-              <td>{t.referencia}</td>
-              <td>{t.horarioAtencion}</td>
+              <td title={t.direccion}>{t.direccion?.substring(0, 15)}{t.direccion?.length! > 15 ? '...' : ''}</td>
+              <td title={t.referencia}>{t.referencia?.substring(0, 15)}{t.referencia?.length! > 15 ? '...' : ''}</td>
+              <td title={t.horarioAtencion}>{t.horarioAtencion?.substring(0, 10)}{t.horarioAtencion?.length! > 10 ? '...' : ''}</td>
               <td>{t.tipo}</td>
-              <td>{t.representante}</td>
-              <td>{t.documentoRepresentante}</td>
-              <td>{t.telefono}</td>
+              <td title={t.representante}>{t.representante?.substring(0, 15)}{t.representante?.length > 15 ? '...' : ''}</td>
+              {/* <td>{t.documentoRepresentante}</td>
+              <td>{t.telefono}</td> */}
               <td>{t.estado ? 'Activo' : 'Inactivo'}</td>
               <td>
                 <button className="edit-btn" onClick={() => {
@@ -132,17 +135,11 @@ export default function TambosPage() {
         <button>4</button>
         <button>Avanzar</button>
       </div>
-      <TamboModal
+
+       <TamboModal
         open={modalOpen}
-        onClose={() => {
-          setModalOpen(false);
-          setSelectedTambo(null);
-        }}
-        onSave={() => {
-          fetchTambos();
-          setModalOpen(false);
-          setSelectedTambo(null);
-        }}
+        onClose={handleCloseModal}
+        onSave={fetchTambos}
         initialData={selectedTambo}
       />
     </div>
