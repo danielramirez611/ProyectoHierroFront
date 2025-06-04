@@ -8,6 +8,17 @@ import { SnackbarProvider } from 'notistack';
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
+// 🔥 Registro manual del Service Worker de Firebase
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker
+    .register('/firebase-messaging-sw.js')
+    .then((registration) => {
+      console.log('✅ Firebase Service Worker registrado:', registration);
+    })
+    .catch((err) => {
+      console.error('❌ Error al registrar Firebase Service Worker:', err);
+    });
+}
 
 root.render(
   <React.StrictMode>

@@ -11,6 +11,7 @@ import {
   Checkbox,
 } from '@mui/material';
 import { Comunicado, DestinatarioEnum, ComunicadoCanalEnvioEnum, TipoContenidoEnum } from '../types/Comunicado';
+import api from '../api'; // ⬅️ Asegura que esta línea esté presente
 
 interface Props {
   open: boolean;
@@ -22,6 +23,7 @@ interface Props {
   readOnly?: boolean; // nuevo prop para modo solo lectura (mostrar)
 
 }
+const BASE_URL = 'https://localhost:7268'; // mismo host que tu backend
 
 export default function ComunicadoModal({
   open,
@@ -48,6 +50,7 @@ export default function ComunicadoModal({
     }));
   };
 
+  
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{editing ? 'Editar Comunicado' : 'Nuevo Comunicado'}</DialogTitle>
@@ -77,83 +80,86 @@ export default function ComunicadoModal({
             onChange={handleChange}
             fullWidth
           />
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (!file) return;
+       <input
+  type="file"
+  accept="image/*"
+  onChange={async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-              const reader = new FileReader();
-              reader.onloadend = () => {
-                const result = reader.result;
-                if (typeof result === 'string') {
-                  setForm(prev => ({
-                    ...prev,
-                    imagenUrl: result as string, // aseguramos que es string
-                  }));
-                }
-              };
-              reader.readAsDataURL(file); // convierte a base64 string
-            }}
-            style={{ marginTop: 8 }}
-          />
+    const formData = new FormData();
+    formData.append('archivo', file);
 
-          {form.imagenUrl && (
-            <img
-              src={form.imagenUrl}
-              alt="Previsualización"
-              style={{
-                width: '100%',
-                maxHeight: 150,
-                objectFit: 'cover',
-                borderRadius: 8,
-                marginTop: 8
-              }}
-            />
-          )}
+    try {
+      const res = await api.post('/Comunicado/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setForm(prev => ({
+        ...prev,
+        imagenUrl: res.data.url, // guardar ruta relativa
+      }));
+    } catch (err) {
+      console.error("Error al subir imagen:", err);
+    }
+  }}
+  style={{ marginTop: 8 }}
+/>
 
-          <TextField
-            label="URL del PDF"
-            name="urlPDF"
-            value={form.urlPDF}
-            onChange={handleChange}
-            fullWidth
-          />
 
-          <input
-            type="file"
-            accept="application/pdf"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (!file) return;
+{form.imagenUrl && (
+  <img
+    src={`${BASE_URL}${form.imagenUrl}`}
+    alt="Previsualización"
+    style={{
+      width: '100%',
+      maxHeight: 150,
+      objectFit: 'cover',
+      borderRadius: 8,
+      marginTop: 8
+    }}
+  />
+)}
 
-              const reader = new FileReader();
-              reader.onloadend = () => {
-                const result = reader.result;
-                if (typeof result === 'string') {
-                  setForm(prev => ({
-                    ...prev,
-                    urlPDF: result as string, // aseguramos que es string
-                  }));
-                }
-              };
-              reader.readAsDataURL(file); // convierte en base64 temporal
-            }}
-            style={{ marginTop: 8 }}
-          />
 
-          {form.urlPDF && (
-            <Box mt={2}>
-              <iframe
-                src={form.urlPDF}
-                title="Previsualización del PDF"
-                width="100%"
-                height="300px"
-                style={{ border: '1px solid #ccc', borderRadius: 8 }}
-              />
-            </Box>
-          )}
+{form.urlPDF && (
+  <Box mt={2}>
+    <iframe
+      src={`${BASE_URL}${form.urlPDF}`}
+      title="Previsualización del PDF"
+      width="100%"
+      height="300px"
+      style={{ border: '1px solid #ccc', borderRadius: 8 }}
+    />
+  </Box>
+)}
+
+<input
+  type="file"
+  accept="application/pdf"
+  onChange={async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('archivo', file);
+
+    try {
+      const res = await api.post('/Comunicado/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setForm(prev => ({
+        ...prev,
+        urlPDF: res.data.url, // guardar ruta del PDF
+      }));
+    } catch (err) {
+      console.error("Error al subir PDF:", err);
+    }
+  }}
+  style={{ marginTop: 8 }}
+/>
+
+
+          
 
 
           <TextField
