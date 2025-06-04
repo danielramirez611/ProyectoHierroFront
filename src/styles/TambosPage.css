@@ -1,0 +1,143 @@
+/* ---------------------------------------------------------
+   BLOQUE PAGINACIÓN
+   --------------------------------------------------------- */
+.pagination {
+  display: flex;
+  gap: 0.3rem;
+  justify-content: center;
+  margin: 1.2rem 0;
+  flex-wrap: wrap;
+}
+
+.pagination button {
+  background: #e2e8f0;
+  border: none;
+  border-radius: 6px;
+  padding: 0.45rem 0.8rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.pagination button.active {
+  background: #4f46e5;
+  color: #fff;
+  font-weight: 600;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ---------------------------------------------------------
+   AJUSTES RESPONSIVE DE LA TABLA (reemplaza el bloque anterior)
+   --------------------------------------------------------- */
+/* ---------- MÓVILES ≤ 640 px  (reemplaza tu bloque actual) ---------- */
+@media (max-width: 640px) {
+
+    .collab-table, .collab-table tbody, .collab-table tr, .collab-table td {
+        display: block;
+        width: auto;
+    }
+  /* Disposición vertical de los controles */
+  .actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .search-bar { max-width: 100%; }
+
+  /* Botón “Nuevo Tambo” a todo el ancho */
+  .new-btn {
+    width: 100%;
+    justify-content: center;
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  /* --- Tabla mostrada como tarjetas --- */
+  .collab-table thead { display: none; }
+
+   /* 1) Anular regla de ellipsis que viene de escritorio */
+  .collab-table td,
+  .collab-table th {
+    max-width: 100% !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+  }
+
+  /* 2) Hacer la tarjeta en dos columnas fluidas */
+  .collab-table td {
+    /* 100 px → 40 %: se adapta a cualquier ancho de pantalla */
+    display: grid;
+    grid-template-columns: 100%;
+    gap: 0.35rem;
+  }
+
+  /* 3) Mejorar legibilidad de etiquetas */
+  .collab-table td::before {
+    font-weight: 600;
+    color: #374151;      /* gris-oscuro Tailwind-ish */
+    word-break: keep-all;
+  }
+ .botones{
+    padding: 1rem !important;
+    display: flex !important;
+    justify-content:right;
+    gap: 1rem !important;
+ }
+ .edit-btn, .delete-btn {
+        font-size: 1rem !important;
+    }
+  /* Etiquetas automáticas */
+  .collab-table td:nth-child(1)::before  { content: "Nombre:"; }
+  .collab-table td:nth-child(2)::before  { content: "Código:"; }
+  .collab-table td:nth-child(3)::before  { content: "Departamento:"; }
+  .collab-table td:nth-child(4)::before  { content: "Provincia:"; }
+  .collab-table td:nth-child(5)::before  { content: "Distrito:"; }
+  .collab-table td:nth-child(6)::before  { content: "Dirección:"; }
+  .collab-table td:nth-child(7)::before  { content: "Referencia:"; }
+  .collab-table td:nth-child(8)::before  { content: "Horario:"; }
+  .collab-table td:nth-child(9)::before  { content: "Tipo:"; }
+  .collab-table td:nth-child(10)::before { content: "Representante:"; }
+  .collab-table td:nth-child(11)::before { content: "Estado:"; }
+  .collab-table td:nth-child(12)::before { content: "Acciones:"; }
+
+  .collab-table td::before {
+    font-weight: 600;
+    color: #444;
+  }
+
+  /* Botones de acción algo más chicos */
+  .edit-btn,
+  .delete-btn {
+    font-size: 0.9rem;
+    padding: 0.35rem 0.4rem;
+    margin: 0 0.15rem;
+  }
+}
+
+
+/* ---------------------------------------------------------
+   ELLIPSIS PARA CELDAS LARGAS (sin cambios)
+   --------------------------------------------------------- */
+.collab-table td,
+.collab-table th {
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 640px) {
+  /* Oculta las celdas Dirección, Referencia, Horario y Tipo */
+  .collab-table td:nth-child(6),
+  .collab-table td:nth-child(7),
+  .collab-table td:nth-child(8),
+  .collab-table td:nth-child(9) { display: none !important; }
+
+  /* Ajusta las etiquetas ::before para que coincidan con las visibles */
+  .collab-table td:nth-child(10)::before { content: "Representante:"; }
+  .collab-table td:nth-child(11)::before { content: "Estado:"; }
+  .collab-table td:nth-child(12)::before { content: "Acciones:"; }
+}

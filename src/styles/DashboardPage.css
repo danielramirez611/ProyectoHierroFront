@@ -118,8 +118,7 @@
 /* cuerpo scrollable */
 .dashboard-body {
   flex: 1;
-  padding: 1.5rem;
-  overflow-y: auto;
+  overflow-y: hidden;
 }
 
 /* tabla para colaboradores */
@@ -449,4 +448,9 @@ th, td {
 @media (min-width: 769px) {
   .hamburger-btn { display: none; }
   .overlay       { display: none; }
+}
+@media (max-width: 640px) {
+  .dashboard-body{
+    overflow-y: auto;
+  }
 }
