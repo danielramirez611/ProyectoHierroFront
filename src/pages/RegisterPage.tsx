@@ -1,197 +1,240 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import api from '../api';
-import '../styles/LoginPage.css';
-import '../styles/PhoneVerificationModal.css';
-import { messaging } from '../FirebaseData/Firebase'; // Importa el messaging de tu config Firebase
-import { getToken } from 'firebase/messaging';
+import '../styles/TambosPage.css';
+import TamboModal from '../Modal/TamboModal';
+import { Tambo } from '../types/Tambo';
+import addUserIcon from '../imgs/Icons-botones/addUser.svg';
 
-import PhoneVerificationModal from '../Modal/PhoneVerificationModal';
+export default function TambosPage() {
+  /* ---------------- ESTADOS PRINCIPALES ---------------- */
+  const pageRef = useRef<HTMLDivElement | null>(null);
+  const [tambos, setTambos] = useState<Tambo[]>([]);
+  const [search, setSearch] = useState('');
+  const [filteredTambos, setFilteredTambos] = useState<Tambo[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedTambo, setSelectedTambo] = useState<Partial<Tambo>>();
+
+  /* ---------------- PAGINACIÓN ---------------- */
+  const [currentPage, setCurrentPage] = useState(1);
+
+  /* --------- FILAS POR PÁGINA DINÁMICAS --------- */
+  const getItemsPerPage = (height: number) => {
+    if (height >= 1280) return 9;   // pantallas muy altas
+    if (height >= 1000) return 7;   // portátiles 15-17"
+    if (height >= 800)  return 6;   // portátiles 13-14"
+    return 4;                       // tablets / móviles
+  };
+
+  // Valor inicial coherente con la pantalla real
+  const [itemsPerPage, setItemsPerPage] = useState(8);
 
 
-export default function RegisterPage() {
-    const [formData, setFormData] = useState({
-        firstName: '',
-        lastNameP: '',
-        lastNameM: '',
-        documentNumber: '',
-        phone: '',
-        email: '',
-        passwordHash: '', // CAMBIA "password" por "passwordHash"
-        role: 'Niño',
-        birthDate: '',
-        gender: '',
-        address: '',
-        firebaseToken: '', // <-- nuevo campo para el token
+  /* Recalcular al redimensionar el contenedor */
+  useEffect(() => {
+    if (!pageRef.current) return;
 
+    const observer = new ResizeObserver(([entry]) => {
+      const height = entry.contentRect.width;        // 👈 usamos la ALTURA
+      setItemsPerPage(prev => {
+        const next = getItemsPerPage(height);
+        return prev === next ? prev : next;
+      });
     });
 
-  // Aquí agregamos el useEffect para obtener el token FCM
-  useEffect(() => {
-    getToken(messaging, { vapidKey: 'BOWk-BBMRj-OB15gVC7cao7oIn5xEBpCaH0oSYA0wIjlfzgCDdQcg5CKEMuFKLV2aq8srzMd6WthsIHRDoA4e7M' }) // reemplaza con tu VAPID key de Firebase Console
-      .then((currentToken) => {
-        if (currentToken) {
-          setFormData(prev => ({ ...prev, firebaseToken: currentToken }));
-          console.log("Token FCM obtenido:", currentToken);
-        } else {
-          console.log('No se pudo obtener token FCM.');
-        }
-      })
-      .catch((err) => {
-        console.error('Error al obtener token FCM:', err);
-      });
+    observer.observe(pageRef.current);
+    return () => observer.disconnect();
   }, []);
+
+  /* Garantizar que currentPage nunca supere el máximo posible */
   useEffect(() => {
-    if (Notification.permission === "granted") {
-      getToken(messaging, { vapidKey: 'BOWk-BBMRj-OB15gVC7cao7oIn5xEBpCaH0oSYA0wIjlfzgCDdQcg5CKEMuFKLV2aq8srzMd6WthsIHRDoA4e7M' })
-        .then(token => {
-          if (token) setFormData(prev => ({ ...prev, firebaseToken: token }));
-        })
-        .catch(console.error);
-    } else if (Notification.permission !== "denied") {
-      Notification.requestPermission().then(permission => {
-        if (permission === "granted") {
-          getToken(messaging, { vapidKey: 'BOWk-BBMRj-OB15gVC7cao7oIn5xEBpCaH0oSYA0wIjlfzgCDdQcg5CKEMuFKLV2aq8srzMd6WthsIHRDoA4e7M' })
-            .then(token => {
-              if (token) setFormData(prev => ({ ...prev, firebaseToken: token }));
-            })
-            .catch(console.error);
-        }
-      });
+    setCurrentPage(page => {
+      const maxPage = Math.max(1, Math.ceil(filteredTambos.length / itemsPerPage));
+      return page > maxPage ? maxPage : page;
+    });
+  }, [itemsPerPage, filteredTambos.length]);
+
+  const lastIndex   = currentPage * itemsPerPage;
+  const firstIndex  = lastIndex - itemsPerPage;
+  const currentTambos = useMemo(
+    () => filteredTambos.slice(firstIndex, lastIndex),
+    [filteredTambos, firstIndex, lastIndex]
+  );
+  const totalPages  = Math.max(1, Math.ceil(filteredTambos.length / itemsPerPage));
+
+  /* ---------------- CRUD ---------------- */
+  const fetchTambos = async () => {
+    try {
+      const { data } = await api.get('/Tambos');
+      setTambos(data);
+      setFilteredTambos(data);
+      setCurrentPage(1);
+    } catch (err) {
+      console.error('Error al obtener tambos:', err);
     }
-  }, []);
-  
-    const [message, setMessage] = useState<React.ReactNode>('');
-    const [showVerificationModal, setShowVerificationModal] = useState(true);
-    const [verificationCode, setVerificationCode] = useState('');
-    const [phoneVerified, setPhoneVerified] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [showModal, setShowModal] = useState(false);
-    const [isVerified, setIsVerified] = useState(false);
-    const navigate = useNavigate();
+  };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+  useEffect(() => { fetchTambos(); }, []);
 
-    const handleDniBlur = async () => {
-        if (formData.documentNumber.length === 8) {
-            try {
-                const response = await api.post('/Users/dni', {
-                    dni: formData.documentNumber
-                });
-                const { firstName, lastNameP, lastNameM } = response.data;
-                setFormData(prev => ({
-                    ...prev,
-                    firstName,
-                    lastNameP,
-                    lastNameM
-                }));
-            } catch {
-                console.log('DNI no encontrado en RENIEC');
-            }
-        }
-    };
-
-    const sendVerification = async () => {
-        try {
-            await api.post('/Users/verify/send', { phone: formData.phone });
-            alert('📩 Código enviado por SMS');
-        } catch {
-            alert('❌ Error al enviar el código');
-        }
-    };
-
-    const checkVerification = async () => {
-        try {
-            setLoading(true);
-            await api.post('/Users/verify/check', {
-                phone: formData.phone,
-                code: verificationCode
-            });
-            setPhoneVerified(true);
-            setShowVerificationModal(false);
-            alert('✅ Teléfono verificado correctamente');
-        } catch {
-            alert('❌ Código incorrecto');
-        } finally {
-            setLoading(false);
-        }
-    };
-    const handleRegister = async () => {
-        if (!phoneVerified) {
-            setShowVerificationModal(true);
-            return;
-        }
-
-        try {
-            await api.post('/Users', formData);
-            // ✅ Mensaje de éxito con ícono check
-            setMessage('✅ Usuario registrado correctamente');
-            // ⏱ Redirige al login luego de 2 segundos
-            setTimeout(() => {
-                navigate('/login');
-            }, 2000);
-        } catch (err: any) {
-            // ✅ Evita error por intentar renderizar objetos
-            const errorMsg = typeof err.response?.data === 'string'
-                ? err.response.data
-                : err.response?.data?.title || '❌ Error al registrar usuario';
-            setMessage(errorMsg);
-        }
-    };
-
-
-
-    return (
-
-        <div className="login-container">
-            
-            <div className="background-image">
-            {showVerificationModal && (
-      <PhoneVerificationModal
-        phone={formData.phone}
-        code={verificationCode}
-        loading={loading}
-        onPhoneChange={(value) => setFormData({ ...formData, phone: value })}
-        onCodeChange={setVerificationCode}
-        onSendCode={sendVerification}
-        onCheckCode={checkVerification}
-      />
-    )}
-
-                <div className="login-box">
-                    
-                    <h2>Registro</h2>
-
-                    <input name="firstName" value={formData.firstName} onChange={handleChange} placeholder="Nombres" className="form-input" />
-                    <input name="lastNameP" value={formData.lastNameP} onChange={handleChange} placeholder="Apellido paterno" className="form-input" />
-                    <input name="lastNameM" value={formData.lastNameM} onChange={handleChange} placeholder="Apellido materno" className="form-input" />
-                    <input name="documentNumber" value={formData.documentNumber} onBlur={handleDniBlur} onChange={handleChange} placeholder="DNI" className="form-input" />
-                    <input name="phone" value={formData.phone} onChange={handleChange} placeholder="Teléfono" className="form-input" />
-                    <input name="email" onChange={handleChange} placeholder="Correo" className="form-input" />
-                    <input
-                        type="password"
-                        name="passwordHash" // este es el campo correcto
-                        onChange={handleChange}
-                        placeholder="Contraseña"
-                        className="form-input"
-                    />
-                    <select name="role" onChange={handleChange} className="form-input">
-                        <option value="Administrador">Administrador</option>
-                        <option value="Gestor">Gestor</option>
-                        <option value="Gestante">Gestante</option>
-                        <option value="Niño">Niño</option>
-                    </select>
-                    <input type="date" name="birthDate" onChange={handleChange} className="form-input" />
-                    <input name="gender" onChange={handleChange} placeholder="Género" className="form-input" />
-                    <input name="address" onChange={handleChange} placeholder="Dirección" className="form-input" />
-
-                    <button onClick={handleRegister} className="form-button">Registrarse</button>
-                    {message && <p className="error-text">{message}</p>}
-                </div>
-            </div>
-
-        </div>
+  /* Búsqueda */
+  useEffect(() => {
+    const filtered = tambos.filter(t =>
+      (t.name || '').toLowerCase().includes(search.toLowerCase())
     );
+    setFilteredTambos(filtered);
+    setCurrentPage(1);
+  }, [search, tambos]);
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('¿Estás seguro de eliminar este tambo?')) return;
+    await api.delete(`/Tambos/${id}`);
+    fetchTambos();
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedTambo(undefined);
+  };
+
+  /* ---------------- RENDER ---------------- */
+  return (
+    <div ref={pageRef} className="page-container">
+      {/* CABECERA */}
+      <div className="header">
+        <h2>Lista de Tambos</h2>
+      </div>
+
+      {/* CONTROLES */}
+      <div className="actions">
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="Ingrese el nombre"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            aria-label="Buscar Tambo por nombre"
+          />
+          <span className="search-icon">🔍</span>
+        </div>
+
+        <button
+          className="new-btn"
+          onClick={() => {
+            setSelectedTambo(undefined);
+            setModalOpen(true);
+          }}
+          aria-label="Agregar nuevo Tambo"
+          title="Agregar Tambo"
+        >
+          <img src={addUserIcon} alt="" />
+          <span>
+            Nuevo
+            <br />
+            Tambo
+          </span>
+        </button>
+      </div>
+
+      {/* TABLA */}
+      <div className="table-container">
+        <table className="collab-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Código</th>
+              <th>Departamento</th>
+              <th>Provincia</th>
+              <th>Distrito</th>
+              <th>Dirección</th>
+              <th>Referencia</th>
+              <th>Horario</th>
+              <th>Tipo</th>
+              <th>Representante</th>
+              <th>Estado</th>
+              <th style={{ textAlign: 'center' }}>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentTambos.map((t) => (
+              <tr key={t.id}>
+                <td>{t.name}</td>
+                <td>{t.code}</td>
+                <td>{t.departamento}</td>
+                <td>{t.provincia}</td>
+                <td>{t.distrito}</td>
+                <td title={t.direccion}>
+                  {t.direccion?.substring(0, 15)}
+                  {t.direccion && t.direccion.length > 15 ? '…' : ''}
+                </td>
+                <td title={t.referencia}>
+                  {t.referencia?.substring(0, 15)}
+                  {t.referencia && t.referencia.length > 15 ? '…' : ''}
+                </td>
+                <td title={t.horarioAtencion}>
+                  {t.horarioAtencion?.substring(0, 10)}
+                  {t.horarioAtencion && t.horarioAtencion.length > 10 ? '…' : ''}
+                </td>
+                <td>{t.tipo}</td>
+                <td title={t.representante}>
+                  {t.representante?.substring(0, 15)}
+                  {t.representante && t.representante.length > 15 ? '…' : ''}
+                </td>
+                <td>{t.estado ? 'Activo' : 'Inactivo'}</td>
+                <td className="botones text-center">
+                  <button
+                    className="edit-btn"
+                    onClick={() => {
+                      setSelectedTambo(t);
+                      setModalOpen(true);
+                    }}
+                  >
+                    ✏️
+                  </button>
+                  <button className="delete-btn" onClick={() => handleDelete(t.id)}>
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* PAGINACIÓN */}
+      {totalPages > 1 && (
+        <div className="pagination">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(p => p - 1)}
+          >
+            Retroceder
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i + 1}
+              className={currentPage === i + 1 ? 'active' : ''}
+              onClick={() => setCurrentPage(i + 1)}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(p => p + 1)}
+          >
+            Avanzar
+          </button>
+        </div>
+      )}
+
+      {/* MODAL */}
+      <TamboModal
+        open={modalOpen}
+        onClose={handleCloseModal}
+        onSave={fetchTambos}
+        initialData={selectedTambo}
+      />
+    </div>
+  );
 }

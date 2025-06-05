@@ -1,43 +1,85 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import api from '../api';
-import '../styles/ColaboradorPage.css';
+import '../styles/ColaboradorPage.css';   // reutiliza tu estilo base
 import PacienteModal from '../Modal/PacienteModal';
-import { Paciente } from '../types/Paciente'; // ajusta el path si es necesario
-import addUserIcon from '../imgs/Icons-botones/addUser.svg'; // ajusta el path si es necesario
-
+import { Paciente } from '../types/Paciente';
+import addUserIcon from '../imgs/Icons-botones/addUser.svg';
 
 export default function PacientesPage() {
+  /* ---------------- ESTADOS PRINCIPALES ---------------- */
+  const pageRef = useRef<HTMLDivElement | null>(null);
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [search, setSearch] = useState('');
-  const [filteredPacientes, setFilteredPacientes] = useState<Paciente[]>([]);
+  const [filtered, setFiltered] = useState<Paciente[]>([]);
   const [openModal, setOpenModal] = useState(false);
   const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null);
-  
+
+  /* ---------------- FILAS POR PÁGINA ---------------- */
+  const getItemsPerPage = (h: number) => {
+    if (h >= 1280) return 10;
+    if (h >= 1000) return 8;
+    if (h >= 800)  return 6;
+    return 4;
+  };
+  const [itemsPerPage, setItemsPerPage] = useState(8);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  /* Observa altura del contenedor */
+  useEffect(() => {
+    if (!pageRef.current) return;
+    const ro = new ResizeObserver(([e]) => {
+      const h = e.contentRect.width;
+      setItemsPerPage(p => {
+        const n = getItemsPerPage(h);
+        return p === n ? p : n;
+      });
+    });
+    ro.observe(pageRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  /* Garantiza página válida */
+  useEffect(() => {
+    setCurrentPage(p => {
+      const max = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
+      return p > max ? max : p;
+    });
+  }, [itemsPerPage, filtered.length]);
+
+  const sliceStart = (currentPage - 1) * itemsPerPage;
+  const current = useMemo(
+    () => filtered.slice(sliceStart, sliceStart + itemsPerPage),
+    [filtered, sliceStart, itemsPerPage]
+  );
+  const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
+
+  /* ---------------- CRUD + SEARCH ---------------- */
   const fetchPacientes = async () => {
     try {
-      const res = await api.get('/Pacientes');
-      const pacientesConNombre: Paciente[] = res.data.map((p: any) => ({
+      const { data } = await api.get('/Pacientes');
+      const list: Paciente[] = data.map((p: any) => ({
         id: p.id,
         userId: p.usuario?.id,
         tieneAnemia: p.tieneAnemia,
-        nombreCompleto: p.usuario ? `${p.usuario.firstName} ${p.usuario.lastNameP} ${p.usuario.lastNameM}` : 'Desconocido'
+        nombreCompleto: p.usuario
+          ? `${p.usuario.firstName} ${p.usuario.lastNameP} ${p.usuario.lastNameM}`
+          : 'Desconocido',
       }));
-      setPacientes(pacientesConNombre);
-      setFilteredPacientes(pacientesConNombre);
+      setPacientes(list);
+      setFiltered(list);
+      setCurrentPage(1);
     } catch (err) {
       console.error('Error al obtener pacientes:', err);
     }
   };
+  useEffect(() => { fetchPacientes(); }, []);
 
   useEffect(() => {
-    fetchPacientes();
-  }, []);
-
-  useEffect(() => {
-    const filtered = pacientes.filter((p) =>
+    const f = pacientes.filter(p =>
       p.nombreCompleto.toLowerCase().includes(search.toLowerCase())
     );
-    setFilteredPacientes(filtered);
+    setFiltered(f);
+    setCurrentPage(1);
   }, [search, pacientes]);
 
   const handleDelete = async (id: number) => {
@@ -46,90 +88,89 @@ export default function PacientesPage() {
     fetchPacientes();
   };
 
+  /* ---------------- RENDER ---------------- */
   return (
-    <div className="page-container">
+    <div ref={pageRef} className="page-container">
       <div className="header">
         <h2>Lista de Pacientes</h2>
       </div>
 
-        {/* CONTROLES */}
-        <div className="actions" style={{ marginBottom: '1.5rem' }}>
-          {/* BUSCADOR */}
-          <div className="search-bar">
-            <input
-              type="text"
-              placeholder="Ingrese el nombre"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              aria-label="Buscar al paciente por nombre"
-            />
-            <span className="search-icon">🔍</span>
-          </div>
-
-          {/* NUEVO */}
-          <button
-            className="new-btn"
-            onClick={() => {
-              setSelectedPaciente(null);
-              setOpenModal(true);
-            }}
-            aria-label="Agregar nuevo paciente"
-            title="Agregar paciente"
-          >
-            <img src={addUserIcon} alt="" />
-            <span>
-              Nuevo
-              <br />
-              PAciente
-            </span>
-          </button>
+      {/* CONTROLES */}
+      <div className="actions">
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="Ingrese el nombre"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            aria-label="Buscar paciente por nombre"
+          />
+          <span className="search-icon">🔍</span>
         </div>
 
-      <table className="collab-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Anemia</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredPacientes.map((p) => (
-            <tr key={p.id}>
-              <td>{p.id}</td>
-              <td>{p.nombreCompleto}</td>
-              <td>{p.tieneAnemia ? 'Sí' : 'No'}</td>
-              <td>
-              <button className="edit-btn" onClick={() => {
-  setSelectedPaciente(p);
-  setOpenModal(true);
-}}>✏️</button>
-                <button className="delete-btn" onClick={() => handleDelete(p.id)}>🗑️</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <div className="pagination">
-        <button>Retroceder</button>
-        <button>1</button>
-        <button>2</button>
-        <button>3</button>
-        <button>4</button>
-        <button>Avanzar</button>
+        <button
+          className="new-btn"
+          onClick={() => { setSelectedPaciente(null); setOpenModal(true); }}
+          aria-label="Agregar nuevo paciente"
+        >
+          <img src={addUserIcon} alt="" />
+          <span>Nuevo<br />Paciente</span>
+        </button>
       </div>
+
+      {/* TABLA */}
+      <div className="table-wrapper">
+        <table className="collab-table">
+          <thead>
+            <tr>
+              <th className="hide-xs">ID</th>
+              <th>Nombre</th>
+              <th>Anemia</th>
+              <th style={{ textAlign: 'center' }}>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {current.map(p => (
+              <tr key={p.id}>
+                <td className="hide-xs">{p.id}</td>
+                <td>{p.nombreCompleto}</td>
+                <td>{p.tieneAnemia ? 'Sí' : 'No'}</td>
+                <td className="text-center">
+                  <button className="edit-btn" onClick={() => { setSelectedPaciente(p); setOpenModal(true); }}>✏️</button>
+                  <button className="delete-btn" onClick={() => handleDelete(p.id)}>🗑️</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* PAGINADOR */}
+      {totalPages > 1 && (
+        <div className="pagination">
+          <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>Retroceder</button>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i + 1}
+              className={currentPage === i + 1 ? 'active' : ''}
+              onClick={() => setCurrentPage(i + 1)}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}>Avanzar</button>
+        </div>
+      )}
+
+      {/* MODAL */}
       {openModal && (
-  <PacienteModal
-    open={openModal}
-    onClose={() => setOpenModal(false)}
-    onSave={fetchPacientes}
-    initialData={selectedPaciente || undefined}
-  />
-)}
-
-
+        <PacienteModal
+          open={openModal}
+          onClose={() => setOpenModal(false)}
+          onSave={fetchPacientes}
+          initialData={selectedPaciente ?? undefined}
+        />
+      )}
     </div>
   );
 }
