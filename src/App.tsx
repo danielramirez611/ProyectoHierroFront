@@ -11,6 +11,8 @@ import PacientesPage from './pages/PacientesPage';
 import ContactosPage from './pages/ContactosPage';
 import RecoverPasswordPage from './pages/RecoverPasswordPage';
 import ComunicadoPage from './pages/ComunicadoPage';
+import AlertaPage from './pages/AlertaPage';
+
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { User } from './types/User';
@@ -114,6 +116,8 @@ function App() {
             <Route path="/pacientes" element={<DashboardLayout onLogout={handleLogout}><PacientesPage /></DashboardLayout>} />
             <Route path="/contactos" element={<DashboardLayout onLogout={handleLogout}><ContactosPage /></DashboardLayout>} />
             <Route path="/comunicados" element={<DashboardLayout onLogout={handleLogout}><ComunicadoPage /></DashboardLayout>} />
+            <Route path="/alertas" element={<DashboardLayout onLogout={handleLogout}><AlertaPage /></DashboardLayout>} />
+
             <Route path="/notificaciones" element={<DashboardLayout onLogout={handleLogout}><NotificacionesPage /></DashboardLayout>} />
 
           </>

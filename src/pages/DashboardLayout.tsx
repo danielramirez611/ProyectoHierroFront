@@ -174,6 +174,12 @@ export default function DashboardLayout({ children, onLogout }: DashboardLayoutP
                 >
                   Comunicado
                 </button>
+                <button
+                  onClick={() =>  handleNavigate('/alertas')}
+                  className={`submenu-link ${pathname === '/alertas' ? 'active' : ''}`}
+                >
+                  Alerta
+                </button>
               </div>
             )}
           </div>
