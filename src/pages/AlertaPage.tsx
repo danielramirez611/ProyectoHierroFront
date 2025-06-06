@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import api from '../api';
 import { Alerta, AlertaTipo, AlertaCategoria, CanalEnvioAlertaEnum } from '../types/Alerta';
 import { toast } from 'react-toastify';
-import '../styles/ColaboradorPage.css';
+import '../styles/TambosPage.css';
 import { messaging } from '../FirebaseData/Firebase';
 import { onMessage } from 'firebase/messaging';
 import AlertaModal from '../Modal/AlertaModal';
 import { Paciente } from '../types/Paciente';
 import { getToken } from 'firebase/messaging'; // ✅ Agrega esto
+import addUserIcon from '../imgs/Icons-botones/addUser.svg';
 
 export default function AlertaPage() {
   const [alertas, setAlertas] = useState<Alerta[]>([]);
@@ -25,6 +26,43 @@ export default function AlertaPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedAlerta, setSelectedAlerta] = useState<Alerta | null>(null);
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
+
+  // 👇 Paginación dinámica por altura
+  const pageRef = useRef<HTMLDivElement>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const getItemsPerPage = (height: number) => {
+    if (height >= 1280) return 9;
+    if (height >= 1000) return 7;
+    if (height >= 800) return 6;
+    return 4;
+  };
+  const [itemsPerPage, setItemsPerPage] = useState(() => getItemsPerPage(window.innerHeight));
+
+  useEffect(() => {
+    if (!pageRef.current) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const height = entry.contentRect.height;
+      const calculated = getItemsPerPage(height);
+      setItemsPerPage((prev) => (prev === calculated ? prev : calculated));
+    });
+    observer.observe(pageRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    setCurrentPage((page) => {
+      const max = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
+      return page > max ? max : page;
+    });
+  }, [itemsPerPage, filtered.length]);
+
+  const lastIndex = currentPage * itemsPerPage;
+  const firstIndex = lastIndex - itemsPerPage;
+  const currentAlertas = useMemo(
+    () => filtered.slice(firstIndex, lastIndex),
+    [filtered, firstIndex, lastIndex]
+  );
+  const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
 
   const fetchAlertas = async () => {
     try {
@@ -54,11 +92,8 @@ export default function AlertaPage() {
     fetchPacientes();
   }, []);
   
-  
-  // 🔔 Firebase Push Notifications + Permiso
   useEffect(() => {
     fetchAlertas();
-
     if ('Notification' in window && Notification.permission !== 'granted') {
       Notification.requestPermission().then((permission) => {
         if (permission === 'granted') {
@@ -66,23 +101,18 @@ export default function AlertaPage() {
         }
       });
     }
-
     const unsubscribe = onMessage(messaging, (payload) => {
       console.log('📥 Notificación recibida:', payload);
       const { title, body } = payload.notification || {};
-
       if (Notification.permission === 'granted' && title) {
         new Notification(title, { body });
       }
-
       toast.info(`📢 ${title || 'Nueva Alerta'}: ${body || ''}`, {
         position: 'top-right',
         autoClose: 5000,
       });
-
       fetchAlertas();
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -96,27 +126,21 @@ export default function AlertaPage() {
       toast.error('⚠️ El mensaje es obligatorio');
       return;
     }
-  
     if (!form.pacienteId || form.pacienteId === 0) {
       toast.error('⚠️ Debes asignar un paciente válido');
       return;
     }
-  
-    // 🧠 Obtener el usuario actual desde localStorage
     const storedUser = localStorage.getItem('user');
     const currentUser = storedUser ? JSON.parse(storedUser) : null;
-  
     if (!currentUser || !currentUser.id) {
       toast.error('⚠️ No se ha podido identificar al usuario autenticado');
       return;
     }
-  
     try {
       const alertaPayload = {
         ...form,
-        creadoPorUserId: currentUser.id, // 👈 clave para evitar error FK
+        creadoPorUserId: currentUser.id,
       };
-  
       if (selectedAlerta?.id) {
         await api.put(`/Alerta/${selectedAlerta.id}`, alertaPayload);
         toast.success('✅ Alerta actualizada correctamente');
@@ -125,7 +149,6 @@ export default function AlertaPage() {
         await api.post('/Alerta', alertaPayload);
         toast.success('✅ Alerta creada correctamente');
       }
-  
       await fetchAlertas();
       setModalOpen(false);
       setSelectedAlerta(null);
@@ -143,13 +166,13 @@ export default function AlertaPage() {
       toast.error('❌ Ocurrió un error al guardar la alerta');
     }
   };
-  
 
   const handleDelete = async (id: number) => {
     if (!window.confirm('¿Estás seguro de eliminar esta alerta?')) return;
     await api.delete(`/Alerta/${id}`);
     await fetchAlertas();
   };
+
   const resetForm = () => {
     setForm({
       mensaje: '',
@@ -161,113 +184,101 @@ export default function AlertaPage() {
       creadoPorUserId: 0,
     });
   };
+
   const enviarNotificacionDePrueba = async () => {
     const storedUser = localStorage.getItem('user');
     const currentUser = storedUser ? JSON.parse(storedUser) : null;
-  
     if (!currentUser || !currentUser.id) {
       toast.error('⚠️ Usuario no autenticado');
       return;
     }
-  
     try {
-      // Obtener datos del usuario actual desde la API (para traer el FirebaseToken actualizado)
       const res = await api.get(`/Users/${currentUser.id}`);
       const firebaseToken = res.data.firebaseToken;
-  
       if (!firebaseToken) {
         toast.error('⚠️ El usuario no tiene un token Firebase registrado');
         return;
       }
-  
-      // Llamar al backend con una notificación genérica
       await api.post('/Notificacion/prueba', {
         token: firebaseToken,
         titulo: '🔔 Notificación de prueba',
         cuerpo: 'Este es un mensaje de prueba desde el botón',
       });
-  
       toast.success('✅ Notificación enviada');
     } catch (err) {
       console.error('❌ Error al enviar notificación de prueba:', err);
       toast.error('❌ Falló el envío de notificación');
     }
   };
-  
+
   return (
-    
-    <div className="page-container">
+    <div className="page-container" ref={pageRef}>
       <div className="header">
         <h2>Lista de Alertas</h2>
+      </div>
+      <div className="actions">
         <div className="search-bar">
           <input
             type="text"
-            placeholder="Buscar por mensaje"
+            placeholder="Ingrese el nombre"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="input-blue"
+            aria-label="Buscar Alerta por nombre"
           />
-          <button>🔍</button>
+          <span className="search-icon">🔍</span>
         </div>
+
         <button
-  className="new-btn"
-  onClick={() => {
-    setSelectedAlerta(null);
-    resetForm();
-    setModalOpen(true);
-  }}
->
-  ➕ Nueva Alerta
-</button>
-<button
-  className="test-btn"
-  onClick={async () => {
-    try {
-      const vapidKey = 'BOWk-BBMRj-OB15gVC7cao7oIn5xEBpCaH0oSYA0wIjlfzgCDdQcg5CKEMuFKLV2aq8srzMd6WthsIHRDoA4e7M';
-      const token = await getToken(messaging, { vapidKey });
-      
-      if (!token) {
-        toast.error("❌ No se pudo obtener el token Firebase");
-        return;
-      }
-
-      console.log("🔑 Token actual:", token);
-
-      // Obtener el usuario actual
-      const storedUser = localStorage.getItem('user');
-      const currentUser = storedUser ? JSON.parse(storedUser) : null;
-
-      if (!currentUser || !currentUser.id) {
-        toast.error("⚠️ Usuario no autenticado");
-        return;
-      }
-
-      // 🔁 Actualiza el token en el backend
-      await api.put(`/Users/${currentUser.id}/firebase-token`, {
-        firebaseToken: token,
-      });
-
-      // 🚀 Enviar notificación de prueba
-      const res = await api.post('/Alerta/probar-notificacion', { token }, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-
-      toast.success(res.data || "✅ Notificación enviada");
-    } catch (err) {
-      console.error('❌ Error al enviar notificación de prueba:', err);
-      toast.error("❌ Error al enviar notificación");
-    }
-  }}
->
-  📤 Probar Notificación Push
-</button>
-
-
-
-
+          className="new-btn"
+          onClick={() => {
+            setSelectedAlerta(null);
+            resetForm();
+            setModalOpen(true);
+          }}
+          aria-label="Nueva alerta"
+          title="Nueva Alerta"
+        >
+          <img src={addUserIcon} alt="" />
+          <span>
+            Nueva
+            <br />
+            Alerta
+          </span>
+        </button>
+        <button
+          className="test-btn"
+          onClick={async () => {
+            try {
+              const vapidKey = 'BOWk-BBMRj-OB15gVC7cao7oIn5xEBpCaH0oSYA0wIjlfzgCDdQcg5CKEMuFKLV2aq8srzMd6WthsIHRDoA4e7M';
+              const token = await getToken(messaging, { vapidKey });
+              if (!token) {
+                toast.error("❌ No se pudo obtener el token Firebase");
+                return;
+              }
+              console.log("🔑 Token actual:", token);
+              const storedUser = localStorage.getItem('user');
+              const currentUser = storedUser ? JSON.parse(storedUser) : null;
+              if (!currentUser || !currentUser.id) {
+                toast.error("⚠️ Usuario no autenticado");
+                return;
+              }
+              await api.put(`/Users/${currentUser.id}/firebase-token`, {
+                firebaseToken: token,
+              });
+              const res = await api.post('/Alerta/probar-notificacion', { token }, {
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              });
+              toast.success(res.data || "✅ Notificación enviada");
+            } catch (err) {
+              console.error('❌ Error al enviar notificación de prueba:', err);
+              toast.error("❌ Error al enviar notificación");
+            }
+          }}
+        >
+          📤 Probar Notificación Push
+        </button>
       </div>
 
       <table className="collab-table">
@@ -282,7 +293,7 @@ export default function AlertaPage() {
           </tr>
         </thead>
         <tbody>
-          {filtered.map((a) => (
+          {currentAlertas.map((a) => (
             <tr key={a.id}>
               <td>{a.tipo}</td>
               <td>{a.mensaje}</td>
@@ -301,20 +312,34 @@ export default function AlertaPage() {
           ))}
         </tbody>
       </table>
+      
+      {totalPages > 1 && ( 
+        <div className="pagination">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            ⬅️ Anterior
+          </button>
+          <span>Página {currentPage} de {totalPages}</span>
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            Siguiente ➡️
+          </button>
+        </div>
+      )}
 
-     
       <AlertaModal
-  open={modalOpen}
-  onClose={() => setModalOpen(false)}
-  onSave={handleSubmit}
-  form={form}
-  setForm={setForm}
-  editing={!!selectedAlerta}
-  pacientes={pacientes}
-/>
-
-
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleSubmit}
+        form={form}
+        setForm={setForm}
+        editing={!!selectedAlerta}
+        pacientes={pacientes}
+      />
     </div>
-    
   );
 }
