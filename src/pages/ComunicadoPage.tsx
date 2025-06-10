@@ -13,6 +13,7 @@ import { toast } from 'react-toastify';
 import PdfPreviewModal from '../Modal/PdfPreviewModal';
 import { messaging } from '../FirebaseData/Firebase';
 import { onMessage } from 'firebase/messaging';
+import addUserIcon from '../imgs/Icons-botones/addUser.svg';
 
 const BASE_URL =  'https://localhost:7268';
 
@@ -162,15 +163,19 @@ export default function ComunicadoPage() {
     <div className="page-container">
       <div className="header">
         <h2>Lista de Comunicados</h2>
+      </div>
+
+      {/* CONTROLES */}
+      <div className="actions">
         <div className="search-bar">
           <input
             type="text"
             placeholder="Buscar por título"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="input-blue"
+            aria-label="Buscar por nombre"
           />
-          <button>🔍</button>
+          <span className="search-icon">🔍</span>
         </div>
         <button
           className="new-btn"
@@ -179,8 +184,15 @@ export default function ComunicadoPage() {
             resetForm();
             setModalOpen(true);
           }}
+          aria-label="Agregar nuevo comunicado"
+          title="Agregar Comunicado"
         >
-          ➕ Nuevo Comunicado
+          <img src={addUserIcon} alt="" />
+          <span className='new-comunicado'>
+            Nuevo
+            <br />
+            Comunicado
+          </span>
         </button>
         
       </div>

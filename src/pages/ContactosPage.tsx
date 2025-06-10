@@ -128,7 +128,7 @@ export default function ContactosPage() {
           aria-label="Agregar nuevo contacto"
         >
           <img src={addUserIcon} alt="" />
-          <span>Nuevo<br />Contacto</span>
+          <span className='new-comunicado'>Nuevo<br />Contacto</span>
         </button>
       </div>
 

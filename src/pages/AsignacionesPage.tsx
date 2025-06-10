@@ -3,7 +3,7 @@ import api from '../api';
 import '../styles/TambosPage.css';    // mantiene tus estilos base
 import AsignacionModal from '../Modal/AsignacionModal';
 import type { Asignacion, AsignacionExtendida } from '../types/Asignacion';
-import addUserIcon from '../imgs/Icons-botones/addUser.svg';
+import gestorIcon from '../imgs/Icons-botones/gestor.svg';
 
 export default function AsignacionesPage() {
   /* ---------------- ESTADOS PRINCIPALES ---------------- */
@@ -108,8 +108,8 @@ const getItemsPerPage = (h: number) => {
           onClick={() => { setSelected(undefined); setModalOpen(true); }}
           aria-label="Agregar nueva asignación"
         >
-          <img src={addUserIcon} alt="" />
-          <span>Nueva<br />Asignación</span>
+          <img src={gestorIcon} alt="" />
+          <span className='new-comunicado'>Nueva<br />Asignación</span>
         </button>
       </div>
 
