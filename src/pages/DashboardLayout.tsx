@@ -153,33 +153,35 @@ export default function DashboardLayout({ children, onLogout }: DashboardLayoutP
               className="menu-item-header"
               onClick={() => toggleMenu('comunicacion')}
             >
-              <img src={MegafonoIcon} alt="" />
+              <img src={CarpetaIcon} alt="" />
               <button
-                className={`menu-btn ${pathname.startsWith('/comunicados') ? 'active' : ''}`}
+                className={`menu-btn ${
+                  ['/comunicados','/alertas']
+                    .some(p => pathname.startsWith(p)) ? 'active' : ''
+                }`}
               >
-                COMUNICACIÓN
+                COMUNICADO
               </button>
               <img
                 src="/img/flecha.png"
                 alt="chevron"
-                className={`chevron-icon ${openMenu==='comunicacion' ? 'rotate' : ''}`}
+                className={`chevron-icon ${openMenu==='gestion' ? 'rotate' : ''}`}
               />
             </div>
-
             {openMenu==='comunicacion' && (
               <div className="submenu">
-                <button
-                  onClick={() =>  handleNavigate('/comunicados')}
-                  className={`submenu-link ${pathname === '/comunicados' ? 'active' : ''}`}
-                >
-                  Comunicado
-                </button>
-                <button
-                  onClick={() =>  handleNavigate('/alertas')}
-                  className={`submenu-link ${pathname === '/alertas' ? 'active' : ''}`}
-                >
-                  Alerta
-                </button>
+                {[
+                  {path:'/comunicados', label:'Comunicado'},
+                  {path:'/alertas',       label:'Alerta'},
+                ].map(({path,label})=>(
+                  <button
+                    key={path}
+                    onClick={() =>  handleNavigate(path)}
+                    className={`submenu-link ${pathname === path ? 'active' : ''}`}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
             )}
           </div>
@@ -190,11 +192,14 @@ export default function DashboardLayout({ children, onLogout }: DashboardLayoutP
               className="menu-item-header"
               onClick={() => toggleMenu('reportes')}
             >
-              <img src={BarrasIcon} alt="" />
+              <img src={CarpetaIcon} alt="" />
               <button
-                className={`menu-btn ${pathname.startsWith('/reportes') ? 'active' : ''}`}
+                className={`menu-btn ${
+                  ['/exportaciones','#']
+                    .some(p => pathname.startsWith(p)) ? 'active' : ''
+                }`}
               >
-                REPORTES
+                REPORTE
               </button>
               <img
                 src="/img/flecha.png"
@@ -202,7 +207,23 @@ export default function DashboardLayout({ children, onLogout }: DashboardLayoutP
                 className={`chevron-icon ${openMenu==='reportes' ? 'rotate' : ''}`}
               />
             </div>
-            {/* Añade sub-menú si fuera necesario */}
+
+            {openMenu==='reportes' && (
+              <div className="submenu">
+                {[
+                  {path:'/exportaciones', label:'Exportaciones'},
+                  {path:'#',       label:'Reportes'},
+                ].map(({path,label})=>(
+                  <button
+                    key={path}
+                    onClick={() =>  handleNavigate(path)}
+                    className={`submenu-link ${pathname === path ? 'active' : ''}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <button onClick={onLogout} className="logout-btn">
