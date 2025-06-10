@@ -113,7 +113,7 @@ export default function DashboardLayout({ children, onLogout }: DashboardLayoutP
               <img src={CarpetaIcon} alt="" />
               <button
                 className={`menu-btn ${
-                  ['/colaboradores','/tambos','/asignaciones','/pacientes','/contactos']
+                  ['/colaboradores','/tambos','/asignaciones','/pacientes','/contactos','/visitas']
                     .some(p => pathname.startsWith(p)) ? 'active' : ''
                 }`}
               >
@@ -134,6 +134,8 @@ export default function DashboardLayout({ children, onLogout }: DashboardLayoutP
                   {path:'/asignaciones', label:'Asignación de gestores'},
                   {path:'/pacientes',    label:'Pacientes'},
                   {path:'/contactos',    label:'Contactos'},
+                  {path:'/visitas',    label:'Visitas'},
+
                 ].map(({path,label})=>(
                   <button
                     key={path}

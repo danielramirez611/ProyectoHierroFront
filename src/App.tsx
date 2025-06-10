@@ -23,6 +23,7 @@ import { onMessage } from 'firebase/messaging';
 import ComunicadoModal from './Modal/ComunicadoModal';
 import NotificacionesPage from './pages/NotificacionesBuzon';
 import ExportacionPage from './pages/ExportacionPage';
+import VisitasPage from './pages/VisitasPage';
 
 function App() {
   const navigate = useNavigate();
@@ -119,6 +120,7 @@ function App() {
             <Route path="/comunicados" element={<DashboardLayout onLogout={handleLogout}><ComunicadoPage /></DashboardLayout>} />
             <Route path="/alertas" element={<DashboardLayout onLogout={handleLogout}><AlertaPage /></DashboardLayout>} />
             <Route path="/exportaciones" element={<DashboardLayout onLogout={handleLogout}><ExportacionPage /></DashboardLayout>} />
+            <Route path="/visitas" element={<DashboardLayout onLogout={handleLogout}><VisitasPage/></DashboardLayout>} />
 
             <Route path="/notificaciones" element={<DashboardLayout onLogout={handleLogout}><NotificacionesPage /></DashboardLayout>} />
 

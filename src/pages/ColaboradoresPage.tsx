@@ -100,7 +100,7 @@ export default function ColaboradoresPage() {
             title="Agregar colaborador"
           >
             <img src={addUserIcon} alt="" />
-            <span>
+            <span className='new-comunicado'>
               Nuevo
               <br />
               colaborador

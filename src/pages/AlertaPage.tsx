@@ -239,7 +239,7 @@ export default function AlertaPage() {
           title="Nueva Alerta"
         >
           <img src={addUserIcon} alt="" />
-          <span>
+          <span className='new-comunicado'>
             Nueva
             <br />
             Alerta

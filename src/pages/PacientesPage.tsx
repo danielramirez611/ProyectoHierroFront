@@ -3,7 +3,7 @@ import api from '../api';
 import '../styles/ColaboradorPage.css';   // reutiliza tu estilo base
 import PacienteModal from '../Modal/PacienteModal';
 import { Paciente } from '../types/Paciente';
-import addUserIcon from '../imgs/Icons-botones/addUser.svg';
+import pacieneIcon from '../imgs/Icons-botones/pacientes.svg';
 
 export default function PacientesPage() {
   /* ---------------- ESTADOS PRINCIPALES ---------------- */
@@ -113,8 +113,8 @@ export default function PacientesPage() {
           onClick={() => { setSelectedPaciente(null); setOpenModal(true); }}
           aria-label="Agregar nuevo paciente"
         >
-          <img src={addUserIcon} alt="" />
-          <span>Nuevo<br />Paciente</span>
+          <img src={pacieneIcon} alt="" />
+          <span className='new-comunicado'>Nuevo<br />Paciente</span>
         </button>
       </div>
 

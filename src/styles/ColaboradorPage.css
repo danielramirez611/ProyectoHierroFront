@@ -79,6 +79,13 @@
   height: 45px;
 }
 
+.new-comunicado{
+  font-weight: bold;
+  font-size: 1rem;
+  text-align: center;
+  color: #4a4a4a;
+}
+
 /* ----- TABLA ----- */
 .table-container {
   max-width: 100%;

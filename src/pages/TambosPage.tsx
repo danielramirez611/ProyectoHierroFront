@@ -3,7 +3,7 @@ import api from '../api';
 import '../styles/TambosPage.css';
 import TamboModal from '../Modal/TamboModal';
 import { Tambo } from '../types/Tambo';
-import addUserIcon from '../imgs/Icons-botones/addUser.svg';
+import casitaIcon from '../imgs/Icons-botones/casita.svg';
 
 export default function TambosPage() {
   /* ---------------- ESTADOS PRINCIPALES ---------------- */
@@ -132,8 +132,8 @@ export default function TambosPage() {
           aria-label="Agregar nuevo Tambo"
           title="Agregar Tambo"
         >
-          <img src={addUserIcon} alt="" />
-          <span>
+          <img src={casitaIcon} alt="" />
+          <span className='new-comunicado'>
             Nuevo
             <br />
             Tambo
