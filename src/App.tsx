@@ -24,6 +24,7 @@ import ComunicadoModal from './Modal/ComunicadoModal';
 import NotificacionesPage from './pages/NotificacionesBuzon';
 import ExportacionPage from './pages/ExportacionPage';
 import VisitasPage from './pages/VisitasPage';
+import ReportePage from './pages/ReportePage';
 
 function App() {
   const navigate = useNavigate();
@@ -121,6 +122,7 @@ function App() {
             <Route path="/alertas" element={<DashboardLayout onLogout={handleLogout}><AlertaPage /></DashboardLayout>} />
             <Route path="/exportaciones" element={<DashboardLayout onLogout={handleLogout}><ExportacionPage /></DashboardLayout>} />
             <Route path="/visitas" element={<DashboardLayout onLogout={handleLogout}><VisitasPage/></DashboardLayout>} />
+            <Route path="/reportes" element={<DashboardLayout onLogout={handleLogout}><ReportePage/></DashboardLayout>} />
 
             <Route path="/notificaciones" element={<DashboardLayout onLogout={handleLogout}><NotificacionesPage /></DashboardLayout>} />
 

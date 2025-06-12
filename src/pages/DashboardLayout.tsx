@@ -214,7 +214,7 @@ export default function DashboardLayout({ children, onLogout }: DashboardLayoutP
               <div className="submenu">
                 {[
                   {path:'/exportaciones', label:'Exportaciones'},
-                  {path:'#',       label:'Reportes'},
+                  {path:'/reportes',       label:'Reportes'},
                 ].map(({path,label})=>(
                   <button
                     key={path}
