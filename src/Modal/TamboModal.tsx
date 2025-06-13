@@ -127,6 +127,13 @@ export default function TamboModal({ open, onClose, onSave, initialData }: Props
         .finally(() => setLoadingCode(false));
     }
   }, [formData.departamento, formData.provincia, formData.distrito, formData.id]);
+  /* dNI*/
+
+  useEffect(() => {
+  if (formData.documentoRepresentante && formData.documentoRepresentante.length >= 6) {
+      buscarRepresentante(formData.documentoRepresentante);
+    }
+  }, [formData.documentoRepresentante]);
 
   /* modo edición */
   useEffect(() => {
@@ -176,16 +183,34 @@ export default function TamboModal({ open, onClose, onSave, initialData }: Props
 
   /* guardar */
   const handleSubmit = async () => {
-    if (formData.id) await api.put(`/Tambos/${formData.id}`, formData);
-    else             await api.post('/Tambos', formData);
+      if (formData.id) await api.put(`/Tambos/${formData.id}`, formData);
+      else             await api.post('/Tambos', formData);
 
-    setSuccessOpen(true);
-    onSave();
-    resetForm();
-    onClose();// mostrar animación
-    setSuccessAnim(true);
-    setTimeout(() => setSuccessAnim(false), 1500);
+      setSuccessOpen(true);
+      onSave();
+      resetForm();
+      onClose();// mostrar animación
+      setSuccessAnim(true);
+      setTimeout(() => setSuccessAnim(false), 1500);
+    };
+    /* Buscar representante */
+    const buscarRepresentante = (dni: string) => {
+    if (dni.length >= 6) {
+      const usuario = usuarios.find(u => u.dni === dni);
+      setFormData(prev => ({
+        ...prev,
+        representante: usuario ? usuario.fullName : '',
+        telefono: usuario ? usuario.telefono : ''
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        representante: '',
+        telefono: ''
+      }));
+    }
   };
+
 
   /* ╭──── UI ────╮ */
   return (
@@ -286,7 +311,7 @@ export default function TamboModal({ open, onClose, onSave, initialData }: Props
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr', xl: '1fr 1fr 1fr' },
               gap: 2,
               mb: 3
             }}
@@ -384,19 +409,14 @@ export default function TamboModal({ open, onClose, onSave, initialData }: Props
           >
             <TextField
               required
-              select
               label="DNI Representante"
               name="documentoRepresentante"
               value={formData.documentoRepresentante}
-              onChange={handleDniChange}
+              onChange={handleChange}
+              onBlur={() => buscarRepresentante(formData.documentoRepresentante || '')}
               fullWidth
-            >
-              {usuarios.map(u => (
-                <MenuItem key={u.dni} value={u.dni}>
-                  {u.dni}
-                </MenuItem>
-              ))}
-            </TextField>
+              inputProps={{ maxLength: 8 }}
+            />
 
             <TextField
               required

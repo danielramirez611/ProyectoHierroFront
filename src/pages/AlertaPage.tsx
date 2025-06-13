@@ -30,10 +30,10 @@ export default function AlertaPage() {
   // 👇 Paginación dinámica por altura
   const pageRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const getItemsPerPage = (height: number) => {
-    if (height >= 1280) return 9;
-    if (height >= 1000) return 7;
-    if (height >= 800) return 6;
+  const getItemsPerPage = (width: number) => {
+    if (width >= 1280) return 9;
+    if (width >= 1000) return 7;
+    if (width >= 800) return 6;
     return 4;
   };
   const [itemsPerPage, setItemsPerPage] = useState(() => getItemsPerPage(window.innerHeight));
@@ -41,8 +41,8 @@ export default function AlertaPage() {
   useEffect(() => {
     if (!pageRef.current) return;
     const observer = new ResizeObserver(([entry]) => {
-      const height = entry.contentRect.height;
-      const calculated = getItemsPerPage(height);
+      const width = entry.contentRect.width;
+      const calculated = getItemsPerPage(width);
       setItemsPerPage((prev) => (prev === calculated ? prev : calculated));
     });
     observer.observe(pageRef.current);
@@ -227,58 +227,63 @@ export default function AlertaPage() {
           />
           <span className="search-icon">🔍</span>
         </div>
-
-        <button
-          className="new-btn"
-          onClick={() => {
-            setSelectedAlerta(null);
-            resetForm();
-            setModalOpen(true);
-          }}
-          aria-label="Nueva alerta"
-          title="Nueva Alerta"
-        >
-          <img src={addUserIcon} alt="" />
-          <span className='new-comunicado'>
-            Nueva
-            <br />
-            Alerta
-          </span>
-        </button>
-        <button
-          className="test-btn"
-          onClick={async () => {
-            try {
-              const vapidKey = 'BOWk-BBMRj-OB15gVC7cao7oIn5xEBpCaH0oSYA0wIjlfzgCDdQcg5CKEMuFKLV2aq8srzMd6WthsIHRDoA4e7M';
-              const token = await getToken(messaging, { vapidKey });
-              if (!token) {
-                toast.error("❌ No se pudo obtener el token Firebase");
-                return;
+        <div className="button-group">
+          <button
+            className="new-btn"
+            onClick={() => {
+              setSelectedAlerta(null);
+              resetForm();
+              setModalOpen(true);
+            }}
+            aria-label="Nueva alerta"
+            title="Nueva Alerta"
+          >
+            <img src={addUserIcon} alt="" />
+            <span className='new-comunicado'>
+              Nueva
+              <br />
+              Alerta
+            </span>
+          </button>
+          <button
+            className="test-btn"
+            onClick={async () => {
+              try {
+                const vapidKey = 'BOWk-BBMRj-OB15gVC7cao7oIn5xEBpCaH0oSYA0wIjlfzgCDdQcg5CKEMuFKLV2aq8srzMd6WthsIHRDoA4e7M';
+                const token = await getToken(messaging, { vapidKey });
+                if (!token) {
+                  toast.error("❌ No se pudo obtener el token Firebase");
+                  return;
+                }
+                console.log("🔑 Token actual:", token);
+                const storedUser = localStorage.getItem('user');
+                const currentUser = storedUser ? JSON.parse(storedUser) : null;
+                if (!currentUser || !currentUser.id) {
+                  toast.error("⚠️ Usuario no autenticado");
+                  return;
+                }
+                await api.put(`/Users/${currentUser.id}/firebase-token`, {
+                  firebaseToken: token,
+                });
+                const res = await api.post('/Alerta/probar-notificacion', { token }, {
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                });
+                toast.success(res.data || "✅ Notificación enviada");
+              } catch (err) {
+                console.error('❌ Error al enviar notificación de prueba:', err);
+                toast.error("❌ Error al enviar notificación");
               }
-              console.log("🔑 Token actual:", token);
-              const storedUser = localStorage.getItem('user');
-              const currentUser = storedUser ? JSON.parse(storedUser) : null;
-              if (!currentUser || !currentUser.id) {
-                toast.error("⚠️ Usuario no autenticado");
-                return;
-              }
-              await api.put(`/Users/${currentUser.id}/firebase-token`, {
-                firebaseToken: token,
-              });
-              const res = await api.post('/Alerta/probar-notificacion', { token }, {
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-              });
-              toast.success(res.data || "✅ Notificación enviada");
-            } catch (err) {
-              console.error('❌ Error al enviar notificación de prueba:', err);
-              toast.error("❌ Error al enviar notificación");
-            }
-          }}
-        >
-          📤 Probar Notificación Push
-        </button>
+            }}
+          >
+            <span className='new-comunicado'>
+              Probar
+              <br />
+              Notificación Push
+            </span>
+          </button>
+        </div>
       </div>
 
       <table className="collab-table">

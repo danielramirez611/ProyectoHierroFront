@@ -28,7 +28,27 @@
   opacity: 0.5;
   cursor: default;
 }
-
+.test-btn{
+  background-color: #bde0ed;
+  color: #4a4a4a;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  height: 100%;
+  text-align: left;
+}
+.button-group{
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+}
 /* ---------------------------------------------------------
    AJUSTES RESPONSIVE DE LA TABLA (reemplaza el bloque anterior)
    --------------------------------------------------------- */
